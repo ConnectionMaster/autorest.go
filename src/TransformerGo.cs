@@ -29,7 +29,9 @@ namespace AutoRest.Go
             TransformMethods(cmg);
             SwaggerExtensions.ProcessParameterizedHost(cmg);
             FixStutteringTypeNames(cmg);
-            AssureUniqueNames(cmg);
+            // Get the setting of enum prefix
+            var enumPrefix = Settings.Instance.Host.GetValue<bool>("enum-prefix").Result;
+            TransfromEnumValues(cmg, enumPrefix);
             TransformPropertyTypes(cmg);
 
             return cmg;
@@ -158,6 +160,32 @@ namespace AutoRest.Go
                     {
                         ((CompositeTypeGo)dt).DiscriminatorEnum = mtm.DiscriminatorEnum;
                     }
+                }
+            }
+        }
+
+        private static void TransfromEnumValues(CodeModelGo cmg, bool prefix = false)
+        {
+            if (prefix)
+            {
+                // we first add the enum type name as the prefix to every enum value - if we do this, we should get no conflict in the following AssureUniqueNames call.
+                AddEnumTypePrefix(cmg);
+            }
+            AssureUniqueNames(cmg);
+        }
+
+        private static void AddEnumTypePrefix(CodeModelGo cmg)
+        {
+            // NOTE: we will add all enum values with the prefix of its type to keep the enum values consistent between different versions
+            foreach (var em in cmg.EnumTypes)
+            {
+                foreach (var v in em.Values)
+                {
+                    // we need to invoke the CodeNamerGo here to ensure the names are properly transformed
+                    var typeName = CodeNamerGo.Instance.GetTypeName(em.Name.FixedValue);
+                    var valueName = CodeNamerGo.Instance.GetEnumMemberName(v.Name);
+                    // check if the value startsWith the type name to avoid duplicate type name prefix (in case of the discriminator enumerations)
+                    v.Name = valueName.StartsWith(typeName) ? valueName : typeName + valueName;
                 }
             }
         }
@@ -326,10 +354,10 @@ namespace AutoRest.Go
         private static void FixStutteringTypeNames(CodeModelGo cmg)
         {
             // Trim the package name from exported types; append a suitable qualifier, if needed, to avoid conflicts.
-            var exportedTypes = new HashSet<object>();
-            exportedTypes.UnionWith(cmg.EnumTypes);
-            exportedTypes.UnionWith(cmg.Methods);
-            exportedTypes.UnionWith(cmg.ModelTypes);
+            var exportedTypes = new List<object>();
+            exportedTypes.AddRange(cmg.EnumTypes);
+            exportedTypes.AddRange(cmg.Methods);
+            exportedTypes.AddRange(cmg.ModelTypes);
 
             var stutteringTypes = exportedTypes
                                     .Where(exported =>
@@ -347,7 +375,7 @@ namespace AutoRest.Go
                         name = name.Value.TrimPackageName(cmg.Namespace);
 
                         var nameInUse = exportedTypes
-                                            .Any(et => (et is IModelType modeltype && modeltype.Name.Equals(name)) || (et is Method methodType && methodType.Name.Equals(name)));
+                                            .Any(et => (et is IModelType modelType && modelType.Name.Equals(name)) || (et is Method methodType && methodType.Name.Equals(name)));
                         if (exported is EnumType enumType)
                         {
                             enumType.Name.Value = CodeNamerGo.AttachTypeName(name, cmg.Namespace, nameInUse, "Enum");

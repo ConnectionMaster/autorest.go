@@ -51,7 +51,7 @@ func (client LROsClient) Delete202NoRetry204(ctx context.Context) (result LROsDe
 
 	result, err = client.Delete202NoRetry204Sender(req)
 	if err != nil {
-		err = autorest.NewErrorWithError(err, "lrogroup.LROsClient", "Delete202NoRetry204", nil, "Failure sending request")
+		err = autorest.NewErrorWithError(err, "lrogroup.LROsClient", "Delete202NoRetry204", result.Response(), "Failure sending request")
 		return
 	}
 
@@ -71,6 +71,7 @@ func (client LROsClient) Delete202NoRetry204Preparer(ctx context.Context) (*http
 // http.Response Body if it receives an error.
 func (client LROsClient) Delete202NoRetry204Sender(req *http.Request) (future LROsDelete202NoRetry204Future, err error) {
 	var resp *http.Response
+	future.FutureAPI = &azure.Future{}
 	resp, err = client.Send(req, autorest.DoRetryForStatusCodes(client.RetryAttempts, client.RetryDuration, autorest.StatusCodesForRetry...))
 	if err != nil {
 		return
@@ -115,7 +116,7 @@ func (client LROsClient) Delete202Retry200(ctx context.Context) (result LROsDele
 
 	result, err = client.Delete202Retry200Sender(req)
 	if err != nil {
-		err = autorest.NewErrorWithError(err, "lrogroup.LROsClient", "Delete202Retry200", nil, "Failure sending request")
+		err = autorest.NewErrorWithError(err, "lrogroup.LROsClient", "Delete202Retry200", result.Response(), "Failure sending request")
 		return
 	}
 
@@ -135,6 +136,7 @@ func (client LROsClient) Delete202Retry200Preparer(ctx context.Context) (*http.R
 // http.Response Body if it receives an error.
 func (client LROsClient) Delete202Retry200Sender(req *http.Request) (future LROsDelete202Retry200Future, err error) {
 	var resp *http.Response
+	future.FutureAPI = &azure.Future{}
 	resp, err = client.Send(req, autorest.DoRetryForStatusCodes(client.RetryAttempts, client.RetryDuration, autorest.StatusCodesForRetry...))
 	if err != nil {
 		return
@@ -178,7 +180,7 @@ func (client LROsClient) Delete204Succeeded(ctx context.Context) (result LROsDel
 
 	result, err = client.Delete204SucceededSender(req)
 	if err != nil {
-		err = autorest.NewErrorWithError(err, "lrogroup.LROsClient", "Delete204Succeeded", nil, "Failure sending request")
+		err = autorest.NewErrorWithError(err, "lrogroup.LROsClient", "Delete204Succeeded", result.Response(), "Failure sending request")
 		return
 	}
 
@@ -198,6 +200,7 @@ func (client LROsClient) Delete204SucceededPreparer(ctx context.Context) (*http.
 // http.Response Body if it receives an error.
 func (client LROsClient) Delete204SucceededSender(req *http.Request) (future LROsDelete204SucceededFuture, err error) {
 	var resp *http.Response
+	future.FutureAPI = &azure.Future{}
 	resp, err = client.Send(req, autorest.DoRetryForStatusCodes(client.RetryAttempts, client.RetryDuration, autorest.StatusCodesForRetry...))
 	if err != nil {
 		return
@@ -241,7 +244,7 @@ func (client LROsClient) DeleteAsyncNoHeaderInRetry(ctx context.Context) (result
 
 	result, err = client.DeleteAsyncNoHeaderInRetrySender(req)
 	if err != nil {
-		err = autorest.NewErrorWithError(err, "lrogroup.LROsClient", "DeleteAsyncNoHeaderInRetry", nil, "Failure sending request")
+		err = autorest.NewErrorWithError(err, "lrogroup.LROsClient", "DeleteAsyncNoHeaderInRetry", result.Response(), "Failure sending request")
 		return
 	}
 
@@ -261,6 +264,7 @@ func (client LROsClient) DeleteAsyncNoHeaderInRetryPreparer(ctx context.Context)
 // http.Response Body if it receives an error.
 func (client LROsClient) DeleteAsyncNoHeaderInRetrySender(req *http.Request) (future LROsDeleteAsyncNoHeaderInRetryFuture, err error) {
 	var resp *http.Response
+	future.FutureAPI = &azure.Future{}
 	resp, err = client.Send(req, autorest.DoRetryForStatusCodes(client.RetryAttempts, client.RetryDuration, autorest.StatusCodesForRetry...))
 	if err != nil {
 		return
@@ -304,7 +308,7 @@ func (client LROsClient) DeleteAsyncNoRetrySucceeded(ctx context.Context) (resul
 
 	result, err = client.DeleteAsyncNoRetrySucceededSender(req)
 	if err != nil {
-		err = autorest.NewErrorWithError(err, "lrogroup.LROsClient", "DeleteAsyncNoRetrySucceeded", nil, "Failure sending request")
+		err = autorest.NewErrorWithError(err, "lrogroup.LROsClient", "DeleteAsyncNoRetrySucceeded", result.Response(), "Failure sending request")
 		return
 	}
 
@@ -324,6 +328,7 @@ func (client LROsClient) DeleteAsyncNoRetrySucceededPreparer(ctx context.Context
 // http.Response Body if it receives an error.
 func (client LROsClient) DeleteAsyncNoRetrySucceededSender(req *http.Request) (future LROsDeleteAsyncNoRetrySucceededFuture, err error) {
 	var resp *http.Response
+	future.FutureAPI = &azure.Future{}
 	resp, err = client.Send(req, autorest.DoRetryForStatusCodes(client.RetryAttempts, client.RetryDuration, autorest.StatusCodesForRetry...))
 	if err != nil {
 		return
@@ -367,7 +372,7 @@ func (client LROsClient) DeleteAsyncRetrycanceled(ctx context.Context) (result L
 
 	result, err = client.DeleteAsyncRetrycanceledSender(req)
 	if err != nil {
-		err = autorest.NewErrorWithError(err, "lrogroup.LROsClient", "DeleteAsyncRetrycanceled", nil, "Failure sending request")
+		err = autorest.NewErrorWithError(err, "lrogroup.LROsClient", "DeleteAsyncRetrycanceled", result.Response(), "Failure sending request")
 		return
 	}
 
@@ -387,6 +392,7 @@ func (client LROsClient) DeleteAsyncRetrycanceledPreparer(ctx context.Context) (
 // http.Response Body if it receives an error.
 func (client LROsClient) DeleteAsyncRetrycanceledSender(req *http.Request) (future LROsDeleteAsyncRetrycanceledFuture, err error) {
 	var resp *http.Response
+	future.FutureAPI = &azure.Future{}
 	resp, err = client.Send(req, autorest.DoRetryForStatusCodes(client.RetryAttempts, client.RetryDuration, autorest.StatusCodesForRetry...))
 	if err != nil {
 		return
@@ -430,7 +436,7 @@ func (client LROsClient) DeleteAsyncRetryFailed(ctx context.Context) (result LRO
 
 	result, err = client.DeleteAsyncRetryFailedSender(req)
 	if err != nil {
-		err = autorest.NewErrorWithError(err, "lrogroup.LROsClient", "DeleteAsyncRetryFailed", nil, "Failure sending request")
+		err = autorest.NewErrorWithError(err, "lrogroup.LROsClient", "DeleteAsyncRetryFailed", result.Response(), "Failure sending request")
 		return
 	}
 
@@ -450,6 +456,7 @@ func (client LROsClient) DeleteAsyncRetryFailedPreparer(ctx context.Context) (*h
 // http.Response Body if it receives an error.
 func (client LROsClient) DeleteAsyncRetryFailedSender(req *http.Request) (future LROsDeleteAsyncRetryFailedFuture, err error) {
 	var resp *http.Response
+	future.FutureAPI = &azure.Future{}
 	resp, err = client.Send(req, autorest.DoRetryForStatusCodes(client.RetryAttempts, client.RetryDuration, autorest.StatusCodesForRetry...))
 	if err != nil {
 		return
@@ -493,7 +500,7 @@ func (client LROsClient) DeleteAsyncRetrySucceeded(ctx context.Context) (result 
 
 	result, err = client.DeleteAsyncRetrySucceededSender(req)
 	if err != nil {
-		err = autorest.NewErrorWithError(err, "lrogroup.LROsClient", "DeleteAsyncRetrySucceeded", nil, "Failure sending request")
+		err = autorest.NewErrorWithError(err, "lrogroup.LROsClient", "DeleteAsyncRetrySucceeded", result.Response(), "Failure sending request")
 		return
 	}
 
@@ -513,6 +520,7 @@ func (client LROsClient) DeleteAsyncRetrySucceededPreparer(ctx context.Context) 
 // http.Response Body if it receives an error.
 func (client LROsClient) DeleteAsyncRetrySucceededSender(req *http.Request) (future LROsDeleteAsyncRetrySucceededFuture, err error) {
 	var resp *http.Response
+	future.FutureAPI = &azure.Future{}
 	resp, err = client.Send(req, autorest.DoRetryForStatusCodes(client.RetryAttempts, client.RetryDuration, autorest.StatusCodesForRetry...))
 	if err != nil {
 		return
@@ -556,7 +564,7 @@ func (client LROsClient) DeleteNoHeaderInRetry(ctx context.Context) (result LROs
 
 	result, err = client.DeleteNoHeaderInRetrySender(req)
 	if err != nil {
-		err = autorest.NewErrorWithError(err, "lrogroup.LROsClient", "DeleteNoHeaderInRetry", nil, "Failure sending request")
+		err = autorest.NewErrorWithError(err, "lrogroup.LROsClient", "DeleteNoHeaderInRetry", result.Response(), "Failure sending request")
 		return
 	}
 
@@ -576,6 +584,7 @@ func (client LROsClient) DeleteNoHeaderInRetryPreparer(ctx context.Context) (*ht
 // http.Response Body if it receives an error.
 func (client LROsClient) DeleteNoHeaderInRetrySender(req *http.Request) (future LROsDeleteNoHeaderInRetryFuture, err error) {
 	var resp *http.Response
+	future.FutureAPI = &azure.Future{}
 	resp, err = client.Send(req, autorest.DoRetryForStatusCodes(client.RetryAttempts, client.RetryDuration, autorest.StatusCodesForRetry...))
 	if err != nil {
 		return
@@ -620,7 +629,7 @@ func (client LROsClient) DeleteProvisioning202Accepted200Succeeded(ctx context.C
 
 	result, err = client.DeleteProvisioning202Accepted200SucceededSender(req)
 	if err != nil {
-		err = autorest.NewErrorWithError(err, "lrogroup.LROsClient", "DeleteProvisioning202Accepted200Succeeded", nil, "Failure sending request")
+		err = autorest.NewErrorWithError(err, "lrogroup.LROsClient", "DeleteProvisioning202Accepted200Succeeded", result.Response(), "Failure sending request")
 		return
 	}
 
@@ -640,6 +649,7 @@ func (client LROsClient) DeleteProvisioning202Accepted200SucceededPreparer(ctx c
 // http.Response Body if it receives an error.
 func (client LROsClient) DeleteProvisioning202Accepted200SucceededSender(req *http.Request) (future LROsDeleteProvisioning202Accepted200SucceededFuture, err error) {
 	var resp *http.Response
+	future.FutureAPI = &azure.Future{}
 	resp, err = client.Send(req, autorest.DoRetryForStatusCodes(client.RetryAttempts, client.RetryDuration, autorest.StatusCodesForRetry...))
 	if err != nil {
 		return
@@ -685,7 +695,7 @@ func (client LROsClient) DeleteProvisioning202Deletingcanceled200(ctx context.Co
 
 	result, err = client.DeleteProvisioning202Deletingcanceled200Sender(req)
 	if err != nil {
-		err = autorest.NewErrorWithError(err, "lrogroup.LROsClient", "DeleteProvisioning202Deletingcanceled200", nil, "Failure sending request")
+		err = autorest.NewErrorWithError(err, "lrogroup.LROsClient", "DeleteProvisioning202Deletingcanceled200", result.Response(), "Failure sending request")
 		return
 	}
 
@@ -705,6 +715,7 @@ func (client LROsClient) DeleteProvisioning202Deletingcanceled200Preparer(ctx co
 // http.Response Body if it receives an error.
 func (client LROsClient) DeleteProvisioning202Deletingcanceled200Sender(req *http.Request) (future LROsDeleteProvisioning202Deletingcanceled200Future, err error) {
 	var resp *http.Response
+	future.FutureAPI = &azure.Future{}
 	resp, err = client.Send(req, autorest.DoRetryForStatusCodes(client.RetryAttempts, client.RetryDuration, autorest.StatusCodesForRetry...))
 	if err != nil {
 		return
@@ -750,7 +761,7 @@ func (client LROsClient) DeleteProvisioning202DeletingFailed200(ctx context.Cont
 
 	result, err = client.DeleteProvisioning202DeletingFailed200Sender(req)
 	if err != nil {
-		err = autorest.NewErrorWithError(err, "lrogroup.LROsClient", "DeleteProvisioning202DeletingFailed200", nil, "Failure sending request")
+		err = autorest.NewErrorWithError(err, "lrogroup.LROsClient", "DeleteProvisioning202DeletingFailed200", result.Response(), "Failure sending request")
 		return
 	}
 
@@ -770,6 +781,7 @@ func (client LROsClient) DeleteProvisioning202DeletingFailed200Preparer(ctx cont
 // http.Response Body if it receives an error.
 func (client LROsClient) DeleteProvisioning202DeletingFailed200Sender(req *http.Request) (future LROsDeleteProvisioning202DeletingFailed200Future, err error) {
 	var resp *http.Response
+	future.FutureAPI = &azure.Future{}
 	resp, err = client.Send(req, autorest.DoRetryForStatusCodes(client.RetryAttempts, client.RetryDuration, autorest.StatusCodesForRetry...))
 	if err != nil {
 		return
@@ -814,7 +826,7 @@ func (client LROsClient) Post200WithPayload(ctx context.Context) (result LROsPos
 
 	result, err = client.Post200WithPayloadSender(req)
 	if err != nil {
-		err = autorest.NewErrorWithError(err, "lrogroup.LROsClient", "Post200WithPayload", nil, "Failure sending request")
+		err = autorest.NewErrorWithError(err, "lrogroup.LROsClient", "Post200WithPayload", result.Response(), "Failure sending request")
 		return
 	}
 
@@ -834,6 +846,7 @@ func (client LROsClient) Post200WithPayloadPreparer(ctx context.Context) (*http.
 // http.Response Body if it receives an error.
 func (client LROsClient) Post200WithPayloadSender(req *http.Request) (future LROsPost200WithPayloadFuture, err error) {
 	var resp *http.Response
+	future.FutureAPI = &azure.Future{}
 	resp, err = client.Send(req, autorest.DoRetryForStatusCodes(client.RetryAttempts, client.RetryDuration, autorest.StatusCodesForRetry...))
 	if err != nil {
 		return
@@ -880,7 +893,7 @@ func (client LROsClient) Post202NoRetry204(ctx context.Context, product *Product
 
 	result, err = client.Post202NoRetry204Sender(req)
 	if err != nil {
-		err = autorest.NewErrorWithError(err, "lrogroup.LROsClient", "Post202NoRetry204", nil, "Failure sending request")
+		err = autorest.NewErrorWithError(err, "lrogroup.LROsClient", "Post202NoRetry204", result.Response(), "Failure sending request")
 		return
 	}
 
@@ -905,6 +918,7 @@ func (client LROsClient) Post202NoRetry204Preparer(ctx context.Context, product 
 // http.Response Body if it receives an error.
 func (client LROsClient) Post202NoRetry204Sender(req *http.Request) (future LROsPost202NoRetry204Future, err error) {
 	var resp *http.Response
+	future.FutureAPI = &azure.Future{}
 	resp, err = client.Send(req, autorest.DoRetryForStatusCodes(client.RetryAttempts, client.RetryDuration, autorest.StatusCodesForRetry...))
 	if err != nil {
 		return
@@ -951,7 +965,7 @@ func (client LROsClient) Post202Retry200(ctx context.Context, product *Product) 
 
 	result, err = client.Post202Retry200Sender(req)
 	if err != nil {
-		err = autorest.NewErrorWithError(err, "lrogroup.LROsClient", "Post202Retry200", nil, "Failure sending request")
+		err = autorest.NewErrorWithError(err, "lrogroup.LROsClient", "Post202Retry200", result.Response(), "Failure sending request")
 		return
 	}
 
@@ -976,6 +990,7 @@ func (client LROsClient) Post202Retry200Preparer(ctx context.Context, product *P
 // http.Response Body if it receives an error.
 func (client LROsClient) Post202Retry200Sender(req *http.Request) (future LROsPost202Retry200Future, err error) {
 	var resp *http.Response
+	future.FutureAPI = &azure.Future{}
 	resp, err = client.Send(req, autorest.DoRetryForStatusCodes(client.RetryAttempts, client.RetryDuration, autorest.StatusCodesForRetry...))
 	if err != nil {
 		return
@@ -1022,7 +1037,7 @@ func (client LROsClient) PostAsyncNoRetrySucceeded(ctx context.Context, product 
 
 	result, err = client.PostAsyncNoRetrySucceededSender(req)
 	if err != nil {
-		err = autorest.NewErrorWithError(err, "lrogroup.LROsClient", "PostAsyncNoRetrySucceeded", nil, "Failure sending request")
+		err = autorest.NewErrorWithError(err, "lrogroup.LROsClient", "PostAsyncNoRetrySucceeded", result.Response(), "Failure sending request")
 		return
 	}
 
@@ -1047,6 +1062,7 @@ func (client LROsClient) PostAsyncNoRetrySucceededPreparer(ctx context.Context, 
 // http.Response Body if it receives an error.
 func (client LROsClient) PostAsyncNoRetrySucceededSender(req *http.Request) (future LROsPostAsyncNoRetrySucceededFuture, err error) {
 	var resp *http.Response
+	future.FutureAPI = &azure.Future{}
 	resp, err = client.Send(req, autorest.DoRetryForStatusCodes(client.RetryAttempts, client.RetryDuration, autorest.StatusCodesForRetry...))
 	if err != nil {
 		return
@@ -1094,7 +1110,7 @@ func (client LROsClient) PostAsyncRetrycanceled(ctx context.Context, product *Pr
 
 	result, err = client.PostAsyncRetrycanceledSender(req)
 	if err != nil {
-		err = autorest.NewErrorWithError(err, "lrogroup.LROsClient", "PostAsyncRetrycanceled", nil, "Failure sending request")
+		err = autorest.NewErrorWithError(err, "lrogroup.LROsClient", "PostAsyncRetrycanceled", result.Response(), "Failure sending request")
 		return
 	}
 
@@ -1119,6 +1135,7 @@ func (client LROsClient) PostAsyncRetrycanceledPreparer(ctx context.Context, pro
 // http.Response Body if it receives an error.
 func (client LROsClient) PostAsyncRetrycanceledSender(req *http.Request) (future LROsPostAsyncRetrycanceledFuture, err error) {
 	var resp *http.Response
+	future.FutureAPI = &azure.Future{}
 	resp, err = client.Send(req, autorest.DoRetryForStatusCodes(client.RetryAttempts, client.RetryDuration, autorest.StatusCodesForRetry...))
 	if err != nil {
 		return
@@ -1165,7 +1182,7 @@ func (client LROsClient) PostAsyncRetryFailed(ctx context.Context, product *Prod
 
 	result, err = client.PostAsyncRetryFailedSender(req)
 	if err != nil {
-		err = autorest.NewErrorWithError(err, "lrogroup.LROsClient", "PostAsyncRetryFailed", nil, "Failure sending request")
+		err = autorest.NewErrorWithError(err, "lrogroup.LROsClient", "PostAsyncRetryFailed", result.Response(), "Failure sending request")
 		return
 	}
 
@@ -1190,6 +1207,7 @@ func (client LROsClient) PostAsyncRetryFailedPreparer(ctx context.Context, produ
 // http.Response Body if it receives an error.
 func (client LROsClient) PostAsyncRetryFailedSender(req *http.Request) (future LROsPostAsyncRetryFailedFuture, err error) {
 	var resp *http.Response
+	future.FutureAPI = &azure.Future{}
 	resp, err = client.Send(req, autorest.DoRetryForStatusCodes(client.RetryAttempts, client.RetryDuration, autorest.StatusCodesForRetry...))
 	if err != nil {
 		return
@@ -1236,7 +1254,7 @@ func (client LROsClient) PostAsyncRetrySucceeded(ctx context.Context, product *P
 
 	result, err = client.PostAsyncRetrySucceededSender(req)
 	if err != nil {
-		err = autorest.NewErrorWithError(err, "lrogroup.LROsClient", "PostAsyncRetrySucceeded", nil, "Failure sending request")
+		err = autorest.NewErrorWithError(err, "lrogroup.LROsClient", "PostAsyncRetrySucceeded", result.Response(), "Failure sending request")
 		return
 	}
 
@@ -1261,6 +1279,7 @@ func (client LROsClient) PostAsyncRetrySucceededPreparer(ctx context.Context, pr
 // http.Response Body if it receives an error.
 func (client LROsClient) PostAsyncRetrySucceededSender(req *http.Request) (future LROsPostAsyncRetrySucceededFuture, err error) {
 	var resp *http.Response
+	future.FutureAPI = &azure.Future{}
 	resp, err = client.Send(req, autorest.DoRetryForStatusCodes(client.RetryAttempts, client.RetryDuration, autorest.StatusCodesForRetry...))
 	if err != nil {
 		return
@@ -1306,7 +1325,7 @@ func (client LROsClient) PostDoubleHeadersFinalAzureHeaderGet(ctx context.Contex
 
 	result, err = client.PostDoubleHeadersFinalAzureHeaderGetSender(req)
 	if err != nil {
-		err = autorest.NewErrorWithError(err, "lrogroup.LROsClient", "PostDoubleHeadersFinalAzureHeaderGet", nil, "Failure sending request")
+		err = autorest.NewErrorWithError(err, "lrogroup.LROsClient", "PostDoubleHeadersFinalAzureHeaderGet", result.Response(), "Failure sending request")
 		return
 	}
 
@@ -1326,6 +1345,7 @@ func (client LROsClient) PostDoubleHeadersFinalAzureHeaderGetPreparer(ctx contex
 // http.Response Body if it receives an error.
 func (client LROsClient) PostDoubleHeadersFinalAzureHeaderGetSender(req *http.Request) (future LROsPostDoubleHeadersFinalAzureHeaderGetFuture, err error) {
 	var resp *http.Response
+	future.FutureAPI = &azure.Future{}
 	resp, err = client.Send(req, autorest.DoRetryForStatusCodes(client.RetryAttempts, client.RetryDuration, autorest.StatusCodesForRetry...))
 	if err != nil {
 		return
@@ -1371,7 +1391,7 @@ func (client LROsClient) PostDoubleHeadersFinalAzureHeaderGetDefault(ctx context
 
 	result, err = client.PostDoubleHeadersFinalAzureHeaderGetDefaultSender(req)
 	if err != nil {
-		err = autorest.NewErrorWithError(err, "lrogroup.LROsClient", "PostDoubleHeadersFinalAzureHeaderGetDefault", nil, "Failure sending request")
+		err = autorest.NewErrorWithError(err, "lrogroup.LROsClient", "PostDoubleHeadersFinalAzureHeaderGetDefault", result.Response(), "Failure sending request")
 		return
 	}
 
@@ -1391,6 +1411,7 @@ func (client LROsClient) PostDoubleHeadersFinalAzureHeaderGetDefaultPreparer(ctx
 // http.Response Body if it receives an error.
 func (client LROsClient) PostDoubleHeadersFinalAzureHeaderGetDefaultSender(req *http.Request) (future LROsPostDoubleHeadersFinalAzureHeaderGetDefaultFuture, err error) {
 	var resp *http.Response
+	future.FutureAPI = &azure.Future{}
 	resp, err = client.Send(req, autorest.DoRetryForStatusCodes(client.RetryAttempts, client.RetryDuration, autorest.StatusCodesForRetry...))
 	if err != nil {
 		return
@@ -1435,7 +1456,7 @@ func (client LROsClient) PostDoubleHeadersFinalLocationGet(ctx context.Context) 
 
 	result, err = client.PostDoubleHeadersFinalLocationGetSender(req)
 	if err != nil {
-		err = autorest.NewErrorWithError(err, "lrogroup.LROsClient", "PostDoubleHeadersFinalLocationGet", nil, "Failure sending request")
+		err = autorest.NewErrorWithError(err, "lrogroup.LROsClient", "PostDoubleHeadersFinalLocationGet", result.Response(), "Failure sending request")
 		return
 	}
 
@@ -1455,6 +1476,7 @@ func (client LROsClient) PostDoubleHeadersFinalLocationGetPreparer(ctx context.C
 // http.Response Body if it receives an error.
 func (client LROsClient) PostDoubleHeadersFinalLocationGetSender(req *http.Request) (future LROsPostDoubleHeadersFinalLocationGetFuture, err error) {
 	var resp *http.Response
+	future.FutureAPI = &azure.Future{}
 	resp, err = client.Send(req, autorest.DoRetryForStatusCodes(client.RetryAttempts, client.RetryDuration, autorest.StatusCodesForRetry...))
 	if err != nil {
 		return
@@ -1502,7 +1524,7 @@ func (client LROsClient) Put200Acceptedcanceled200(ctx context.Context, product 
 
 	result, err = client.Put200Acceptedcanceled200Sender(req)
 	if err != nil {
-		err = autorest.NewErrorWithError(err, "lrogroup.LROsClient", "Put200Acceptedcanceled200", nil, "Failure sending request")
+		err = autorest.NewErrorWithError(err, "lrogroup.LROsClient", "Put200Acceptedcanceled200", result.Response(), "Failure sending request")
 		return
 	}
 
@@ -1527,6 +1549,7 @@ func (client LROsClient) Put200Acceptedcanceled200Preparer(ctx context.Context, 
 // http.Response Body if it receives an error.
 func (client LROsClient) Put200Acceptedcanceled200Sender(req *http.Request) (future LROsPut200Acceptedcanceled200Future, err error) {
 	var resp *http.Response
+	future.FutureAPI = &azure.Future{}
 	resp, err = client.Send(req, autorest.DoRetryForStatusCodes(client.RetryAttempts, client.RetryDuration, autorest.StatusCodesForRetry...))
 	if err != nil {
 		return
@@ -1573,7 +1596,7 @@ func (client LROsClient) Put200Succeeded(ctx context.Context, product *Product) 
 
 	result, err = client.Put200SucceededSender(req)
 	if err != nil {
-		err = autorest.NewErrorWithError(err, "lrogroup.LROsClient", "Put200Succeeded", nil, "Failure sending request")
+		err = autorest.NewErrorWithError(err, "lrogroup.LROsClient", "Put200Succeeded", result.Response(), "Failure sending request")
 		return
 	}
 
@@ -1598,6 +1621,7 @@ func (client LROsClient) Put200SucceededPreparer(ctx context.Context, product *P
 // http.Response Body if it receives an error.
 func (client LROsClient) Put200SucceededSender(req *http.Request) (future LROsPut200SucceededFuture, err error) {
 	var resp *http.Response
+	future.FutureAPI = &azure.Future{}
 	resp, err = client.Send(req, autorest.DoRetryForStatusCodes(client.RetryAttempts, client.RetryDuration, autorest.StatusCodesForRetry...))
 	if err != nil {
 		return
@@ -1644,7 +1668,7 @@ func (client LROsClient) Put200SucceededNoState(ctx context.Context, product *Pr
 
 	result, err = client.Put200SucceededNoStateSender(req)
 	if err != nil {
-		err = autorest.NewErrorWithError(err, "lrogroup.LROsClient", "Put200SucceededNoState", nil, "Failure sending request")
+		err = autorest.NewErrorWithError(err, "lrogroup.LROsClient", "Put200SucceededNoState", result.Response(), "Failure sending request")
 		return
 	}
 
@@ -1669,6 +1693,7 @@ func (client LROsClient) Put200SucceededNoStatePreparer(ctx context.Context, pro
 // http.Response Body if it receives an error.
 func (client LROsClient) Put200SucceededNoStateSender(req *http.Request) (future LROsPut200SucceededNoStateFuture, err error) {
 	var resp *http.Response
+	future.FutureAPI = &azure.Future{}
 	resp, err = client.Send(req, autorest.DoRetryForStatusCodes(client.RetryAttempts, client.RetryDuration, autorest.StatusCodesForRetry...))
 	if err != nil {
 		return
@@ -1716,7 +1741,7 @@ func (client LROsClient) Put200UpdatingSucceeded204(ctx context.Context, product
 
 	result, err = client.Put200UpdatingSucceeded204Sender(req)
 	if err != nil {
-		err = autorest.NewErrorWithError(err, "lrogroup.LROsClient", "Put200UpdatingSucceeded204", nil, "Failure sending request")
+		err = autorest.NewErrorWithError(err, "lrogroup.LROsClient", "Put200UpdatingSucceeded204", result.Response(), "Failure sending request")
 		return
 	}
 
@@ -1741,6 +1766,7 @@ func (client LROsClient) Put200UpdatingSucceeded204Preparer(ctx context.Context,
 // http.Response Body if it receives an error.
 func (client LROsClient) Put200UpdatingSucceeded204Sender(req *http.Request) (future LROsPut200UpdatingSucceeded204Future, err error) {
 	var resp *http.Response
+	future.FutureAPI = &azure.Future{}
 	resp, err = client.Send(req, autorest.DoRetryForStatusCodes(client.RetryAttempts, client.RetryDuration, autorest.StatusCodesForRetry...))
 	if err != nil {
 		return
@@ -1788,7 +1814,7 @@ func (client LROsClient) Put201CreatingFailed200(ctx context.Context, product *P
 
 	result, err = client.Put201CreatingFailed200Sender(req)
 	if err != nil {
-		err = autorest.NewErrorWithError(err, "lrogroup.LROsClient", "Put201CreatingFailed200", nil, "Failure sending request")
+		err = autorest.NewErrorWithError(err, "lrogroup.LROsClient", "Put201CreatingFailed200", result.Response(), "Failure sending request")
 		return
 	}
 
@@ -1813,6 +1839,7 @@ func (client LROsClient) Put201CreatingFailed200Preparer(ctx context.Context, pr
 // http.Response Body if it receives an error.
 func (client LROsClient) Put201CreatingFailed200Sender(req *http.Request) (future LROsPut201CreatingFailed200Future, err error) {
 	var resp *http.Response
+	future.FutureAPI = &azure.Future{}
 	resp, err = client.Send(req, autorest.DoRetryForStatusCodes(client.RetryAttempts, client.RetryDuration, autorest.StatusCodesForRetry...))
 	if err != nil {
 		return
@@ -1860,7 +1887,7 @@ func (client LROsClient) Put201CreatingSucceeded200(ctx context.Context, product
 
 	result, err = client.Put201CreatingSucceeded200Sender(req)
 	if err != nil {
-		err = autorest.NewErrorWithError(err, "lrogroup.LROsClient", "Put201CreatingSucceeded200", nil, "Failure sending request")
+		err = autorest.NewErrorWithError(err, "lrogroup.LROsClient", "Put201CreatingSucceeded200", result.Response(), "Failure sending request")
 		return
 	}
 
@@ -1885,6 +1912,7 @@ func (client LROsClient) Put201CreatingSucceeded200Preparer(ctx context.Context,
 // http.Response Body if it receives an error.
 func (client LROsClient) Put201CreatingSucceeded200Sender(req *http.Request) (future LROsPut201CreatingSucceeded200Future, err error) {
 	var resp *http.Response
+	future.FutureAPI = &azure.Future{}
 	resp, err = client.Send(req, autorest.DoRetryForStatusCodes(client.RetryAttempts, client.RetryDuration, autorest.StatusCodesForRetry...))
 	if err != nil {
 		return
@@ -1931,7 +1959,7 @@ func (client LROsClient) Put202Retry200(ctx context.Context, product *Product) (
 
 	result, err = client.Put202Retry200Sender(req)
 	if err != nil {
-		err = autorest.NewErrorWithError(err, "lrogroup.LROsClient", "Put202Retry200", nil, "Failure sending request")
+		err = autorest.NewErrorWithError(err, "lrogroup.LROsClient", "Put202Retry200", result.Response(), "Failure sending request")
 		return
 	}
 
@@ -1956,6 +1984,7 @@ func (client LROsClient) Put202Retry200Preparer(ctx context.Context, product *Pr
 // http.Response Body if it receives an error.
 func (client LROsClient) Put202Retry200Sender(req *http.Request) (future LROsPut202Retry200Future, err error) {
 	var resp *http.Response
+	future.FutureAPI = &azure.Future{}
 	resp, err = client.Send(req, autorest.DoRetryForStatusCodes(client.RetryAttempts, client.RetryDuration, autorest.StatusCodesForRetry...))
 	if err != nil {
 		return
@@ -2002,7 +2031,7 @@ func (client LROsClient) PutAsyncNoHeaderInRetry(ctx context.Context, product *P
 
 	result, err = client.PutAsyncNoHeaderInRetrySender(req)
 	if err != nil {
-		err = autorest.NewErrorWithError(err, "lrogroup.LROsClient", "PutAsyncNoHeaderInRetry", nil, "Failure sending request")
+		err = autorest.NewErrorWithError(err, "lrogroup.LROsClient", "PutAsyncNoHeaderInRetry", result.Response(), "Failure sending request")
 		return
 	}
 
@@ -2027,6 +2056,7 @@ func (client LROsClient) PutAsyncNoHeaderInRetryPreparer(ctx context.Context, pr
 // http.Response Body if it receives an error.
 func (client LROsClient) PutAsyncNoHeaderInRetrySender(req *http.Request) (future LROsPutAsyncNoHeaderInRetryFuture, err error) {
 	var resp *http.Response
+	future.FutureAPI = &azure.Future{}
 	resp, err = client.Send(req, autorest.DoRetryForStatusCodes(client.RetryAttempts, client.RetryDuration, autorest.StatusCodesForRetry...))
 	if err != nil {
 		return
@@ -2072,7 +2102,7 @@ func (client LROsClient) PutAsyncNonResource(ctx context.Context, sku *Sku) (res
 
 	result, err = client.PutAsyncNonResourceSender(req)
 	if err != nil {
-		err = autorest.NewErrorWithError(err, "lrogroup.LROsClient", "PutAsyncNonResource", nil, "Failure sending request")
+		err = autorest.NewErrorWithError(err, "lrogroup.LROsClient", "PutAsyncNonResource", result.Response(), "Failure sending request")
 		return
 	}
 
@@ -2097,6 +2127,7 @@ func (client LROsClient) PutAsyncNonResourcePreparer(ctx context.Context, sku *S
 // http.Response Body if it receives an error.
 func (client LROsClient) PutAsyncNonResourceSender(req *http.Request) (future LROsPutAsyncNonResourceFuture, err error) {
 	var resp *http.Response
+	future.FutureAPI = &azure.Future{}
 	resp, err = client.Send(req, autorest.DoRetryForStatusCodes(client.RetryAttempts, client.RetryDuration, autorest.StatusCodesForRetry...))
 	if err != nil {
 		return
@@ -2144,7 +2175,7 @@ func (client LROsClient) PutAsyncNoRetrycanceled(ctx context.Context, product *P
 
 	result, err = client.PutAsyncNoRetrycanceledSender(req)
 	if err != nil {
-		err = autorest.NewErrorWithError(err, "lrogroup.LROsClient", "PutAsyncNoRetrycanceled", nil, "Failure sending request")
+		err = autorest.NewErrorWithError(err, "lrogroup.LROsClient", "PutAsyncNoRetrycanceled", result.Response(), "Failure sending request")
 		return
 	}
 
@@ -2169,6 +2200,7 @@ func (client LROsClient) PutAsyncNoRetrycanceledPreparer(ctx context.Context, pr
 // http.Response Body if it receives an error.
 func (client LROsClient) PutAsyncNoRetrycanceledSender(req *http.Request) (future LROsPutAsyncNoRetrycanceledFuture, err error) {
 	var resp *http.Response
+	future.FutureAPI = &azure.Future{}
 	resp, err = client.Send(req, autorest.DoRetryForStatusCodes(client.RetryAttempts, client.RetryDuration, autorest.StatusCodesForRetry...))
 	if err != nil {
 		return
@@ -2216,7 +2248,7 @@ func (client LROsClient) PutAsyncNoRetrySucceeded(ctx context.Context, product *
 
 	result, err = client.PutAsyncNoRetrySucceededSender(req)
 	if err != nil {
-		err = autorest.NewErrorWithError(err, "lrogroup.LROsClient", "PutAsyncNoRetrySucceeded", nil, "Failure sending request")
+		err = autorest.NewErrorWithError(err, "lrogroup.LROsClient", "PutAsyncNoRetrySucceeded", result.Response(), "Failure sending request")
 		return
 	}
 
@@ -2241,6 +2273,7 @@ func (client LROsClient) PutAsyncNoRetrySucceededPreparer(ctx context.Context, p
 // http.Response Body if it receives an error.
 func (client LROsClient) PutAsyncNoRetrySucceededSender(req *http.Request) (future LROsPutAsyncNoRetrySucceededFuture, err error) {
 	var resp *http.Response
+	future.FutureAPI = &azure.Future{}
 	resp, err = client.Send(req, autorest.DoRetryForStatusCodes(client.RetryAttempts, client.RetryDuration, autorest.StatusCodesForRetry...))
 	if err != nil {
 		return
@@ -2288,7 +2321,7 @@ func (client LROsClient) PutAsyncRetryFailed(ctx context.Context, product *Produ
 
 	result, err = client.PutAsyncRetryFailedSender(req)
 	if err != nil {
-		err = autorest.NewErrorWithError(err, "lrogroup.LROsClient", "PutAsyncRetryFailed", nil, "Failure sending request")
+		err = autorest.NewErrorWithError(err, "lrogroup.LROsClient", "PutAsyncRetryFailed", result.Response(), "Failure sending request")
 		return
 	}
 
@@ -2313,6 +2346,7 @@ func (client LROsClient) PutAsyncRetryFailedPreparer(ctx context.Context, produc
 // http.Response Body if it receives an error.
 func (client LROsClient) PutAsyncRetryFailedSender(req *http.Request) (future LROsPutAsyncRetryFailedFuture, err error) {
 	var resp *http.Response
+	future.FutureAPI = &azure.Future{}
 	resp, err = client.Send(req, autorest.DoRetryForStatusCodes(client.RetryAttempts, client.RetryDuration, autorest.StatusCodesForRetry...))
 	if err != nil {
 		return
@@ -2360,7 +2394,7 @@ func (client LROsClient) PutAsyncRetrySucceeded(ctx context.Context, product *Pr
 
 	result, err = client.PutAsyncRetrySucceededSender(req)
 	if err != nil {
-		err = autorest.NewErrorWithError(err, "lrogroup.LROsClient", "PutAsyncRetrySucceeded", nil, "Failure sending request")
+		err = autorest.NewErrorWithError(err, "lrogroup.LROsClient", "PutAsyncRetrySucceeded", result.Response(), "Failure sending request")
 		return
 	}
 
@@ -2385,6 +2419,7 @@ func (client LROsClient) PutAsyncRetrySucceededPreparer(ctx context.Context, pro
 // http.Response Body if it receives an error.
 func (client LROsClient) PutAsyncRetrySucceededSender(req *http.Request) (future LROsPutAsyncRetrySucceededFuture, err error) {
 	var resp *http.Response
+	future.FutureAPI = &azure.Future{}
 	resp, err = client.Send(req, autorest.DoRetryForStatusCodes(client.RetryAttempts, client.RetryDuration, autorest.StatusCodesForRetry...))
 	if err != nil {
 		return
@@ -2430,7 +2465,7 @@ func (client LROsClient) PutAsyncSubResource(ctx context.Context, product *SubPr
 
 	result, err = client.PutAsyncSubResourceSender(req)
 	if err != nil {
-		err = autorest.NewErrorWithError(err, "lrogroup.LROsClient", "PutAsyncSubResource", nil, "Failure sending request")
+		err = autorest.NewErrorWithError(err, "lrogroup.LROsClient", "PutAsyncSubResource", result.Response(), "Failure sending request")
 		return
 	}
 
@@ -2455,6 +2490,7 @@ func (client LROsClient) PutAsyncSubResourcePreparer(ctx context.Context, produc
 // http.Response Body if it receives an error.
 func (client LROsClient) PutAsyncSubResourceSender(req *http.Request) (future LROsPutAsyncSubResourceFuture, err error) {
 	var resp *http.Response
+	future.FutureAPI = &azure.Future{}
 	resp, err = client.Send(req, autorest.DoRetryForStatusCodes(client.RetryAttempts, client.RetryDuration, autorest.StatusCodesForRetry...))
 	if err != nil {
 		return
@@ -2501,7 +2537,7 @@ func (client LROsClient) PutNoHeaderInRetry(ctx context.Context, product *Produc
 
 	result, err = client.PutNoHeaderInRetrySender(req)
 	if err != nil {
-		err = autorest.NewErrorWithError(err, "lrogroup.LROsClient", "PutNoHeaderInRetry", nil, "Failure sending request")
+		err = autorest.NewErrorWithError(err, "lrogroup.LROsClient", "PutNoHeaderInRetry", result.Response(), "Failure sending request")
 		return
 	}
 
@@ -2526,6 +2562,7 @@ func (client LROsClient) PutNoHeaderInRetryPreparer(ctx context.Context, product
 // http.Response Body if it receives an error.
 func (client LROsClient) PutNoHeaderInRetrySender(req *http.Request) (future LROsPutNoHeaderInRetryFuture, err error) {
 	var resp *http.Response
+	future.FutureAPI = &azure.Future{}
 	resp, err = client.Send(req, autorest.DoRetryForStatusCodes(client.RetryAttempts, client.RetryDuration, autorest.StatusCodesForRetry...))
 	if err != nil {
 		return
@@ -2571,7 +2608,7 @@ func (client LROsClient) PutNonResource(ctx context.Context, sku *Sku) (result L
 
 	result, err = client.PutNonResourceSender(req)
 	if err != nil {
-		err = autorest.NewErrorWithError(err, "lrogroup.LROsClient", "PutNonResource", nil, "Failure sending request")
+		err = autorest.NewErrorWithError(err, "lrogroup.LROsClient", "PutNonResource", result.Response(), "Failure sending request")
 		return
 	}
 
@@ -2596,6 +2633,7 @@ func (client LROsClient) PutNonResourcePreparer(ctx context.Context, sku *Sku) (
 // http.Response Body if it receives an error.
 func (client LROsClient) PutNonResourceSender(req *http.Request) (future LROsPutNonResourceFuture, err error) {
 	var resp *http.Response
+	future.FutureAPI = &azure.Future{}
 	resp, err = client.Send(req, autorest.DoRetryForStatusCodes(client.RetryAttempts, client.RetryDuration, autorest.StatusCodesForRetry...))
 	if err != nil {
 		return
@@ -2641,7 +2679,7 @@ func (client LROsClient) PutSubResource(ctx context.Context, product *SubProduct
 
 	result, err = client.PutSubResourceSender(req)
 	if err != nil {
-		err = autorest.NewErrorWithError(err, "lrogroup.LROsClient", "PutSubResource", nil, "Failure sending request")
+		err = autorest.NewErrorWithError(err, "lrogroup.LROsClient", "PutSubResource", result.Response(), "Failure sending request")
 		return
 	}
 
@@ -2666,6 +2704,7 @@ func (client LROsClient) PutSubResourcePreparer(ctx context.Context, product *Su
 // http.Response Body if it receives an error.
 func (client LROsClient) PutSubResourceSender(req *http.Request) (future LROsPutSubResourceFuture, err error) {
 	var resp *http.Response
+	future.FutureAPI = &azure.Future{}
 	resp, err = client.Send(req, autorest.DoRetryForStatusCodes(client.RetryAttempts, client.RetryDuration, autorest.StatusCodesForRetry...))
 	if err != nil {
 		return
