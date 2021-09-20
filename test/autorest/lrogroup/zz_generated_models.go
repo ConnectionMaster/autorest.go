@@ -1,4 +1,5 @@
-// +build go1.13
+//go:build go1.16
+// +build go1.16
 
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License. See License.txt in the project root for license information.
@@ -279,6 +280,12 @@ type LROsBeginDeleteProvisioning202DeletingFailed200Options struct {
 // method.
 type LROsBeginDeleteProvisioning202Deletingcanceled200Options struct {
 	// placeholder for future optional parameters
+}
+
+// LROsBeginPatch200SucceededIgnoreHeadersOptions contains the optional parameters for the LROs.BeginPatch200SucceededIgnoreHeaders method.
+type LROsBeginPatch200SucceededIgnoreHeadersOptions struct {
+	// Product to patch
+	Product *Product
 }
 
 // LROsBeginPost200WithPayloadOptions contains the optional parameters for the LROs.BeginPost200WithPayload method.

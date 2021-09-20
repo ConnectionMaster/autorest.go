@@ -8,9 +8,9 @@ AutoRest needs the below config to pick this up as a plug-in - see https://githu
 
 # Pipeline Configuration
 ``` yaml
-version: 3.4.3
+version: 3.6.2
 use-extension:
-  "@autorest/modelerfour" : "4.19.2"
+  "@autorest/modelerfour" : "4.21.1"
 
 modelerfour:
   resolve-schema-name-collisons: true
@@ -71,4 +71,7 @@ help-content:
       - key: module-version
         description: Semantic version to include in generated telemetryInfo constant without the leading 'v' (e.g. 1.2.3).
         type: string
+      - key: group-parameters
+        description: Enables parameter grouping via x-ms-parameter-grouping, defaults to true.
+        type: boolean
 ```

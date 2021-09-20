@@ -1,4 +1,5 @@
-// +build go1.13
+//go:build go1.16
+// +build go1.16
 
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License. See License.txt in the project root for license information.
@@ -64,6 +65,19 @@ type ParameterGroupingPostRequiredParameters struct {
 	Path string
 	// Query parameter with default
 	Query *int32
+}
+
+// ParameterGroupingPostReservedWordsOptions contains the optional parameters for the ParameterGrouping.PostReservedWords method.
+type ParameterGroupingPostReservedWordsOptions struct {
+	// placeholder for future optional parameters
+}
+
+// ParameterGroupingPostReservedWordsParameters contains a group of parameters for the ParameterGrouping.PostReservedWords method.
+type ParameterGroupingPostReservedWordsParameters struct {
+	// 'accept' is a reserved word. Pass in 'yes' to pass.
+	Accept *string
+	// 'from' is a reserved word. Pass in 'bob' to pass.
+	From *string
 }
 
 // ParameterGroupingPostSharedParameterGroupObjectOptions contains the optional parameters for the ParameterGrouping.PostSharedParameterGroupObject method.
