@@ -5,60 +5,51 @@ package urlgroup
 
 import (
 	"context"
-	"reflect"
+	"generatortests"
 	"testing"
 
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore/runtime"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
+	"github.com/stretchr/testify/require"
 )
 
 func TestGetAllWithValues(t *testing.T) {
-	grp := NewPathItemsClient("globalStringPath", to.StringPtr("globalStringQuery"), nil)
+	pl := runtime.NewPipeline(generatortests.ModuleName, generatortests.ModuleVersion, runtime.PipelineOptions{}, &azcore.ClientOptions{})
+	grp := NewPathItemsClient("globalStringPath", to.Ptr("globalStringQuery"), pl)
 	result, err := grp.GetAllWithValues(context.Background(), "pathItemStringPath", "localStringPath", &PathItemsClientGetAllWithValuesOptions{
-		LocalStringQuery:    to.StringPtr("localStringQuery"),
-		PathItemStringQuery: to.StringPtr("pathItemStringQuery"),
+		LocalStringQuery:    to.Ptr("localStringQuery"),
+		PathItemStringQuery: to.Ptr("pathItemStringQuery"),
 	})
-	if err != nil {
-		t.Fatal(err)
-	}
-	if !reflect.ValueOf(result).IsZero() {
-		t.Fatal("expected zero-value result")
-	}
+	require.NoError(t, err)
+	require.Zero(t, result)
 }
 
 func TestGetGlobalAndLocalQueryNull(t *testing.T) {
-	grp := NewPathItemsClient("globalStringPath", nil, nil)
+	pl := runtime.NewPipeline(generatortests.ModuleName, generatortests.ModuleVersion, runtime.PipelineOptions{}, &azcore.ClientOptions{})
+	grp := NewPathItemsClient("globalStringPath", nil, pl)
 	result, err := grp.GetGlobalAndLocalQueryNull(context.Background(), "pathItemStringPath", "localStringPath", &PathItemsClientGetGlobalAndLocalQueryNullOptions{
-		PathItemStringQuery: to.StringPtr("pathItemStringQuery"),
+		PathItemStringQuery: to.Ptr("pathItemStringQuery"),
 	})
-	if err != nil {
-		t.Fatal(err)
-	}
-	if !reflect.ValueOf(result).IsZero() {
-		t.Fatal("expected zero-value result")
-	}
+	require.NoError(t, err)
+	require.Zero(t, result)
 }
 
 func TestGetGlobalQueryNull(t *testing.T) {
-	grp := NewPathItemsClient("globalStringPath", nil, nil)
+	pl := runtime.NewPipeline(generatortests.ModuleName, generatortests.ModuleVersion, runtime.PipelineOptions{}, &azcore.ClientOptions{})
+	grp := NewPathItemsClient("globalStringPath", nil, pl)
 	result, err := grp.GetGlobalQueryNull(context.Background(), "pathItemStringPath", "localStringPath", &PathItemsClientGetGlobalQueryNullOptions{
-		LocalStringQuery:    to.StringPtr("localStringQuery"),
-		PathItemStringQuery: to.StringPtr("pathItemStringQuery"),
+		LocalStringQuery:    to.Ptr("localStringQuery"),
+		PathItemStringQuery: to.Ptr("pathItemStringQuery"),
 	})
-	if err != nil {
-		t.Fatal(err)
-	}
-	if !reflect.ValueOf(result).IsZero() {
-		t.Fatal("expected zero-value result")
-	}
+	require.NoError(t, err)
+	require.Zero(t, result)
 }
 
 func TestGetLocalPathItemQueryNull(t *testing.T) {
-	grp := NewPathItemsClient("globalStringPath", to.StringPtr("globalStringQuery"), nil)
+	pl := runtime.NewPipeline(generatortests.ModuleName, generatortests.ModuleVersion, runtime.PipelineOptions{}, &azcore.ClientOptions{})
+	grp := NewPathItemsClient("globalStringPath", to.Ptr("globalStringQuery"), pl)
 	result, err := grp.GetLocalPathItemQueryNull(context.Background(), "pathItemStringPath", "localStringPath", nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if !reflect.ValueOf(result).IsZero() {
-		t.Fatal("expected zero-value result")
-	}
+	require.NoError(t, err)
+	require.Zero(t, result)
 }

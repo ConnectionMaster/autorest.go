@@ -5,40 +5,42 @@ package complexgroup
 
 import (
 	"context"
-	"reflect"
+	"generatortests"
 	"testing"
 
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore/runtime"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	"github.com/google/go-cmp/cmp"
+	"github.com/stretchr/testify/require"
 )
 
 func newInheritanceClient() *InheritanceClient {
-	return NewInheritanceClient(nil)
+	pl := runtime.NewPipeline(generatortests.ModuleName, generatortests.ModuleVersion, runtime.PipelineOptions{}, &azcore.ClientOptions{})
+	return NewInheritanceClient(pl)
 }
 
 func TestInheritanceGetValid(t *testing.T) {
 	client := newInheritanceClient()
 	result, err := client.GetValid(context.Background(), nil)
-	if err != nil {
-		t.Fatalf("GetValid: %v", err)
-	}
+	require.NoError(t, err)
 	if r := cmp.Diff(result.Siamese, Siamese{
-		ID:    to.Int32Ptr(2),
-		Name:  to.StringPtr("Siameeee"),
-		Color: to.StringPtr("green"),
+		ID:    to.Ptr[int32](2),
+		Name:  to.Ptr("Siameeee"),
+		Color: to.Ptr("green"),
 		Hates: []*Dog{
 			{
-				ID:   to.Int32Ptr(1),
-				Name: to.StringPtr("Potato"),
-				Food: to.StringPtr("tomato"),
+				ID:   to.Ptr[int32](1),
+				Name: to.Ptr("Potato"),
+				Food: to.Ptr("tomato"),
 			},
 			{
-				ID:   to.Int32Ptr(-1),
-				Name: to.StringPtr("Tomato"),
-				Food: to.StringPtr("french fries"),
+				ID:   to.Ptr[int32](-1),
+				Name: to.Ptr("Tomato"),
+				Food: to.Ptr("french fries"),
 			},
 		},
-		Breed: to.StringPtr("persian"),
+		Breed: to.Ptr("persian"),
 	}); r != "" {
 		t.Fatal(r)
 	}
@@ -47,27 +49,23 @@ func TestInheritanceGetValid(t *testing.T) {
 func TestInheritancePutValid(t *testing.T) {
 	client := newInheritanceClient()
 	result, err := client.PutValid(context.Background(), Siamese{
-		ID:    to.Int32Ptr(2),
-		Name:  to.StringPtr("Siameeee"),
-		Color: to.StringPtr("green"),
+		ID:    to.Ptr[int32](2),
+		Name:  to.Ptr("Siameeee"),
+		Color: to.Ptr("green"),
 		Hates: []*Dog{
 			{
-				ID:   to.Int32Ptr(1),
-				Name: to.StringPtr("Potato"),
-				Food: to.StringPtr("tomato"),
+				ID:   to.Ptr[int32](1),
+				Name: to.Ptr("Potato"),
+				Food: to.Ptr("tomato"),
 			},
 			{
-				ID:   to.Int32Ptr(-1),
-				Name: to.StringPtr("Tomato"),
-				Food: to.StringPtr("french fries"),
+				ID:   to.Ptr[int32](-1),
+				Name: to.Ptr("Tomato"),
+				Food: to.Ptr("french fries"),
 			},
 		},
-		Breed: to.StringPtr("persian"),
+		Breed: to.Ptr("persian"),
 	}, nil)
-	if err != nil {
-		t.Fatalf("PutValid: %v", err)
-	}
-	if !reflect.ValueOf(result).IsZero() {
-		t.Fatal("expected zero-value result")
-	}
+	require.NoError(t, err)
+	require.Zero(t, result)
 }

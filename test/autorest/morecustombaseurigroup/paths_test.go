@@ -5,29 +5,27 @@ package morecustombaseurigroup
 
 import (
 	"context"
-	"reflect"
+	"generatortests"
 	"testing"
 
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore/runtime"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
+	"github.com/stretchr/testify/require"
 )
 
 func newPathsClient() *PathsClient {
 	// dnsSuffix string, subscriptionID string
-	return NewPathsClient("test12", &PathsClientOptions{
-		DnsSuffix: to.StringPtr(":3000"),
-	})
+	pl := runtime.NewPipeline(generatortests.ModuleName, generatortests.ModuleVersion, runtime.PipelineOptions{}, &azcore.ClientOptions{})
+	return NewPathsClient(to.Ptr(":3000"), "test12", pl)
 }
 
 func TestGetEmpty(t *testing.T) {
 	client := newPathsClient()
 	// vault string, secret string, keyName string, options *PathsGetEmptyOptions
 	result, err := client.GetEmpty(context.Background(), "http://localhost", "", "key1", &PathsClientGetEmptyOptions{
-		KeyVersion: to.StringPtr("v1"),
+		KeyVersion: to.Ptr("v1"),
 	})
-	if err != nil {
-		t.Fatalf("GetEmpty: %v", err)
-	}
-	if !reflect.ValueOf(result).IsZero() {
-		t.Fatal("expected zero-value result")
-	}
+	require.NoError(t, err)
+	require.Zero(t, result)
 }

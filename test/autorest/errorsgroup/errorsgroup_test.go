@@ -6,28 +6,29 @@ package errorsgroup
 import (
 	"context"
 	"errors"
-	"reflect"
+	"generatortests"
 	"testing"
 	"time"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore/runtime"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	"github.com/google/go-cmp/cmp"
+	"github.com/stretchr/testify/require"
 )
 
 func newPetClient() *PetClient {
 	options := azcore.ClientOptions{}
 	options.Retry.MaxRetryDelay = 20 * time.Millisecond
-	return NewPetClient(&options)
+	pl := runtime.NewPipeline(generatortests.ModuleName, generatortests.ModuleVersion, runtime.PipelineOptions{}, &options)
+	return NewPetClient(pl)
 }
 
 // DoSomething - Asks pet to do something
 func TestDoSomethingSuccess(t *testing.T) {
 	client := newPetClient()
 	result, err := client.DoSomething(context.Background(), "stay", nil)
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 	// bug in test server, route returns wrong JSON model so PetAction is empty
 	if r := cmp.Diff(result.PetAction, PetAction{}); r != "" {
 		t.Fatal(r)
@@ -57,9 +58,7 @@ ERROR CODE UNAVAILABLE
 	if got := respErr.Error(); got != want {
 		t.Fatalf("\ngot:\n%s\nwant:\n%s\n", got, want)
 	}
-	if !reflect.ValueOf(result).IsZero() {
-		t.Fatal("expected empty response")
-	}
+	require.Zero(t, result)
 }
 
 func TestDoSomethingError2(t *testing.T) {
@@ -86,9 +85,7 @@ ERROR CODE UNAVAILABLE
 	if got := respErr.Error(); got != want {
 		t.Fatalf("\ngot:\n%s\nwant:\n%s\n", got, want)
 	}
-	if !reflect.ValueOf(result).IsZero() {
-		t.Fatal("expected empty response")
-	}
+	require.Zero(t, result)
 }
 
 func TestDoSomethingError3(t *testing.T) {
@@ -112,21 +109,17 @@ ERROR CODE UNAVAILABLE
 	if got := respErr.Error(); got != want {
 		t.Fatalf("\ngot:\n%s\nwant:\n%s\n", got, want)
 	}
-	if !reflect.ValueOf(result).IsZero() {
-		t.Fatal("expected empty response")
-	}
+	require.Zero(t, result)
 }
 
 // GetPetByID - Gets pets by id.
 func TestGetPetByIDSuccess1(t *testing.T) {
 	client := newPetClient()
 	result, err := client.GetPetByID(context.Background(), "tommy", nil)
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 	if r := cmp.Diff(result.Pet, Pet{
-		AniType: to.StringPtr("Dog"),
-		Name:    to.StringPtr("Tommy Tomson"),
+		AniType: to.Ptr("Dog"),
+		Name:    to.Ptr("Tommy Tomson"),
 	}); r != "" {
 		t.Fatal(r)
 	}
@@ -135,12 +128,8 @@ func TestGetPetByIDSuccess1(t *testing.T) {
 func TestGetPetByIDSuccess2(t *testing.T) {
 	client := newPetClient()
 	result, err := client.GetPetByID(context.Background(), "django", nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if !reflect.ValueOf(result).IsZero() {
-		t.Fatal("expected zero-value result")
-	}
+	require.NoError(t, err)
+	require.Zero(t, result)
 }
 
 func TestGetPetByIDError1(t *testing.T) {
@@ -166,9 +155,7 @@ ERROR CODE UNAVAILABLE
 	if got := respErr.Error(); got != want {
 		t.Fatalf("\ngot:\n%s\nwant:\n%s\n", got, want)
 	}
-	if !reflect.ValueOf(result).IsZero() {
-		t.Fatal("expected empty response")
-	}
+	require.Zero(t, result)
 }
 
 func TestGetPetByIDError2(t *testing.T) {
@@ -194,17 +181,13 @@ ERROR CODE UNAVAILABLE
 	if got := respErr.Error(); got != want {
 		t.Fatalf("\ngot:\n%s\nwant:\n%s\n", got, want)
 	}
-	if !reflect.ValueOf(result).IsZero() {
-		t.Fatal("expected empty response")
-	}
+	require.Zero(t, result)
 }
 
 func TestGetPetByIDError3(t *testing.T) {
 	client := newPetClient()
 	result, err := client.GetPetByID(context.Background(), "ringo", nil)
-	if err == nil {
-		t.Fatal("unexpected nil error")
-	}
+	require.Error(t, err)
 	var respErr *azcore.ResponseError
 	if !errors.As(err, &respErr) {
 		t.Fatalf("expected azcore.ResponseError: %v", err)
@@ -220,17 +203,13 @@ ERROR CODE UNAVAILABLE
 	if got := respErr.Error(); got != want {
 		t.Fatalf("\ngot:\n%s\nwant:\n%s\n", got, want)
 	}
-	if !reflect.ValueOf(result).IsZero() {
-		t.Fatal("expected empty response")
-	}
+	require.Zero(t, result)
 }
 
 func TestGetPetByIDError4(t *testing.T) {
 	client := newPetClient()
 	result, err := client.GetPetByID(context.Background(), "alien123", nil)
-	if err == nil {
-		t.Fatal("unexpected nil error")
-	}
+	require.Error(t, err)
 	var respErr *azcore.ResponseError
 	if !errors.As(err, &respErr) {
 		t.Fatalf("expected azcore.ResponseError: %v", err)
@@ -246,9 +225,7 @@ ERROR CODE UNAVAILABLE
 	if got := respErr.Error(); got != want {
 		t.Fatalf("\ngot:\n%s\nwant:\n%s\n", got, want)
 	}
-	if !reflect.ValueOf(result).IsZero() {
-		t.Fatal("expected empty response")
-	}
+	require.Zero(t, result)
 }
 
 func TestGetPetByIDError5(t *testing.T) {
@@ -270,7 +247,5 @@ That's all folks!!
 	if got := respErr.Error(); got != want {
 		t.Fatalf("\ngot:\n%s\nwant:\n%s\n", got, want)
 	}
-	if !reflect.ValueOf(result).IsZero() {
-		t.Fatal("expected empty response")
-	}
+	require.Zero(t, result)
 }

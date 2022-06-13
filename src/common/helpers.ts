@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { ArraySchema, BinaryResponse, DictionarySchema, ObjectSchema, Operation, Parameter, Response, Schema, SchemaResponse, SchemaType } from '@autorest/codemodel';
+import { ArraySchema, BinaryResponse, ConstantSchema, DictionarySchema, ObjectSchema, Operation, Parameter, Response, Schema, SchemaContext, SchemaResponse, SchemaType } from '@autorest/codemodel';
 import { values } from '@azure-tools/linq';
 
 // variable to be used to determine comment length when calling comment from @azure-tools
@@ -46,19 +46,9 @@ export function isBinaryResponse(resp: Response): resp is BinaryResponse {
   return (resp as BinaryResponse).binary !== undefined;
 }
 
-export interface PagerInfo {
-  name: string;
-  op: Operation;
-}
-
 // returns true if the operation is pageable
 export function isPageableOperation(op: Operation): boolean {
   return op.language.go!.paging;
-}
-
-export interface PollerInfo {
-  name: string;
-  op: Operation;
 }
 
 // returns true if the operation is a long-running operation
@@ -192,4 +182,20 @@ export function isTypePassedByValue(schema: Schema): boolean {
     return true;
   }
   return false;
+}
+
+// returns a Go-formatted constant value
+export function formatConstantValue(schema: ConstantSchema): string {
+  // null check must come before any type checks
+  if (schema.value.value === null) {
+    return 'nil';
+  } else if (schema.valueType.type === SchemaType.String) {
+    return `"${schema.value.value}"`;
+  }
+  return schema.value.value;
+}
+
+//  returns true if the object is used for output only
+export function isOutputOnly(obj: ObjectSchema): boolean {
+  return !values(obj.usage).any((u) => { return u === SchemaContext.Input});
 }

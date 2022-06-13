@@ -8,9 +8,9 @@ AutoRest needs the below config to pick this up as a plug-in - see https://githu
 
 # Pipeline Configuration
 ``` yaml
-version: 3.7.2
+version: 3.8.2
 use-extension:
-  "@autorest/modelerfour" : "4.22.3"
+  "@autorest/modelerfour" : "4.23.1"
 
 modelerfour:
   treat-type-object-as-anything: true
@@ -38,7 +38,6 @@ pipeline:
   # output the files to disk
   go/emitter:
     input: 
-      - go-protocol
       - go-transform  # this allows us to dump out the code model after the namer (add --output-artifact:code-model-v4 on the command line)
       - go/text-transform # this grabs the outputs after the last step.
       
@@ -63,6 +62,9 @@ help-content:
       - key: module
         type: string
         description: The name of the Go module written to go.mod.  Omit to skip go.mod generation.
+      - key: azcore-version
+        description: Semantic version of azcore without the leading 'v' to use if different from the default version (e.g. 1.2.3).
+        type: string
       - key: file-prefix
         type: string
         description: Optional prefix to file names. For example, if you set your file prefix to "zzz_", all generated code files will begin with "zzz_".
@@ -70,7 +72,7 @@ help-content:
         type: boolean
         description: Indicates if generated clients are to be exported.  Default to true for ARM, false for data-plane.
       - key: module-version
-        description: Semantic version to include in generated telemetryInfo constant without the leading 'v' (e.g. 1.2.3).
+        description: When --azure-arm is true, semantic version to include in generated telemetryInfo constant without the leading 'v' (e.g. 1.2.3).
         type: string
       - key: group-parameters
         description: Enables parameter grouping via x-ms-parameter-grouping, defaults to true.
@@ -78,4 +80,7 @@ help-content:
       - key: stutter
         type: string
         description: Uses the specified value to remove stuttering from types and funcs instead of the built-in algorithm.
+      - key: honor-body-placement
+        type: boolean
+        description: When true, optional body parameters are treated as such for PATCH and PUT operations.
 ```

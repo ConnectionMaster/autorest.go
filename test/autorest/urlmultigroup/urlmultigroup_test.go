@@ -5,13 +5,18 @@ package urlmultigroup
 
 import (
 	"context"
+	"generatortests"
 	"net/url"
-	"reflect"
 	"testing"
+
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore/runtime"
+	"github.com/stretchr/testify/require"
 )
 
 func newQueriesClient() *QueriesClient {
-	return NewQueriesClient(nil)
+	pl := runtime.NewPipeline(generatortests.ModuleName, generatortests.ModuleVersion, runtime.PipelineOptions{}, &azcore.ClientOptions{})
+	return NewQueriesClient(pl)
 }
 
 func TestURLMultiArrayStringMultiEmpty(t *testing.T) {
@@ -19,12 +24,8 @@ func TestURLMultiArrayStringMultiEmpty(t *testing.T) {
 	result, err := client.ArrayStringMultiEmpty(context.Background(), &QueriesClientArrayStringMultiEmptyOptions{
 		ArrayQuery: []string{},
 	})
-	if err != nil {
-		t.Fatalf("ArrayStringMultiEmpty: %v", err)
-	}
-	if !reflect.ValueOf(result).IsZero() {
-		t.Fatal("expected zero-value result")
-	}
+	require.NoError(t, err)
+	require.Zero(t, result)
 }
 
 func TestURLMultiArrayStringMultiNull(t *testing.T) {
@@ -32,12 +33,8 @@ func TestURLMultiArrayStringMultiNull(t *testing.T) {
 	result, err := client.ArrayStringMultiNull(context.Background(), &QueriesClientArrayStringMultiNullOptions{
 		ArrayQuery: nil,
 	})
-	if err != nil {
-		t.Fatalf("ArrayStringMultiNull: %v", err)
-	}
-	if !reflect.ValueOf(result).IsZero() {
-		t.Fatal("expected zero-value result")
-	}
+	require.NoError(t, err)
+	require.Zero(t, result)
 }
 
 func TestURLMultiArrayStringMultiValid(t *testing.T) {
@@ -50,10 +47,6 @@ func TestURLMultiArrayStringMultiValid(t *testing.T) {
 			"",
 			""},
 	})
-	if err != nil {
-		t.Fatalf("ArrayStringMultiValid: %v", err)
-	}
-	if !reflect.ValueOf(result).IsZero() {
-		t.Fatal("expected zero-value result")
-	}
+	require.NoError(t, err)
+	require.Zero(t, result)
 }

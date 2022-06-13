@@ -5,24 +5,27 @@ package azurespecialsgroup
 
 import (
 	"context"
+	"generatortests"
 	"testing"
 
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore/runtime"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	"github.com/google/go-cmp/cmp"
+	"github.com/stretchr/testify/require"
 )
 
 func newHeaderClient() *HeaderClient {
-	return NewHeaderClient(nil)
+	pl := runtime.NewPipeline(generatortests.ModuleName, generatortests.ModuleVersion, runtime.PipelineOptions{}, &azcore.ClientOptions{})
+	return NewHeaderClient(pl)
 }
 
 // CustomNamedRequestID - Send foo-client-request-id = 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0 in the header of the request
 func TestCustomNamedRequestID(t *testing.T) {
 	client := newHeaderClient()
 	result, err := client.CustomNamedRequestID(context.Background(), "9C4D50EE-2D56-4CD3-8152-34347DC9F2B0", nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if r := cmp.Diff(result.FooRequestID, to.StringPtr("123")); r != "" {
+	require.NoError(t, err)
+	if r := cmp.Diff(result.FooRequestID, to.Ptr("123")); r != "" {
 		t.Fatal(r)
 	}
 }
@@ -31,13 +34,11 @@ func TestCustomNamedRequestID(t *testing.T) {
 func TestCustomNamedRequestIDHead(t *testing.T) {
 	client := newHeaderClient()
 	result, err := client.CustomNamedRequestIDHead(context.Background(), "9C4D50EE-2D56-4CD3-8152-34347DC9F2B0", nil)
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 	if !result.Success {
 		t.Fatal("expected success")
 	}
-	if r := cmp.Diff(result.FooRequestID, to.StringPtr("123")); r != "" {
+	if r := cmp.Diff(result.FooRequestID, to.Ptr("123")); r != "" {
 		t.Fatal(r)
 	}
 }
@@ -47,11 +48,9 @@ func TestCustomNamedRequestIDParamGrouping(t *testing.T) {
 	client := newHeaderClient()
 	result, err := client.CustomNamedRequestIDParamGrouping(context.Background(), HeaderClientCustomNamedRequestIDParamGroupingParameters{
 		FooClientRequestID: "9C4D50EE-2D56-4CD3-8152-34347DC9F2B0",
-	})
-	if err != nil {
-		t.Fatal(err)
-	}
-	if r := cmp.Diff(result.FooRequestID, to.StringPtr("123")); r != "" {
+	}, nil)
+	require.NoError(t, err)
+	if r := cmp.Diff(result.FooRequestID, to.Ptr("123")); r != "" {
 		t.Fatal(r)
 	}
 }

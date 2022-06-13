@@ -5,14 +5,16 @@ package xmlgroup
 
 import (
 	"context"
-	"reflect"
+	"generatortests"
 	"testing"
 	"time"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/policy"
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore/runtime"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	"github.com/google/go-cmp/cmp"
+	"github.com/stretchr/testify/require"
 )
 
 func toTimePtr(layout string, value string) *time.Time {
@@ -24,26 +26,25 @@ func toTimePtr(layout string, value string) *time.Time {
 }
 
 func newXMLClient() *XMLClient {
-	return NewXMLClient(&azcore.ClientOptions{
+	pl := runtime.NewPipeline(generatortests.ModuleName, generatortests.ModuleVersion, runtime.PipelineOptions{}, &azcore.ClientOptions{
 		Logging: policy.LogOptions{
 			IncludeBody: true,
 		},
 	})
+	return NewXMLClient(pl)
 }
 
 func TestGetACLs(t *testing.T) {
 	client := newXMLClient()
 	result, err := client.GetACLs(context.Background(), nil)
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 	expected := []*SignedIdentifier{
 		{
-			ID: to.StringPtr("MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI="),
+			ID: to.Ptr("MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI="),
 			AccessPolicy: &AccessPolicy{
 				Start:      toTimePtr(time.RFC3339Nano, "2009-09-28T08:49:37.123Z"),
 				Expiry:     toTimePtr(time.RFC3339Nano, "2009-09-29T08:49:37.123Z"),
-				Permission: to.StringPtr("rwd"),
+				Permission: to.Ptr("rwd"),
 			},
 		},
 	}
@@ -55,9 +56,7 @@ func TestGetACLs(t *testing.T) {
 func TestGetBytes(t *testing.T) {
 	client := newXMLClient()
 	result, err := client.GetBytes(context.Background(), nil)
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 	if string(result.Bytes) != "Hello world" {
 		t.Fatalf("unexpected bytes %s", string(result.Bytes))
 	}
@@ -66,14 +65,12 @@ func TestGetBytes(t *testing.T) {
 func TestGetComplexTypeRefNoMeta(t *testing.T) {
 	client := newXMLClient()
 	result, err := client.GetComplexTypeRefNoMeta(context.Background(), nil)
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 	expected := RootWithRefAndNoMeta{
 		RefToModel: &ComplexTypeNoMeta{
-			ID: to.StringPtr("myid"),
+			ID: to.Ptr("myid"),
 		},
-		Something: to.StringPtr("else"),
+		Something: to.Ptr("else"),
 	}
 	if r := cmp.Diff(result.RootWithRefAndNoMeta, expected); r != "" {
 		t.Fatal(r)
@@ -83,14 +80,12 @@ func TestGetComplexTypeRefNoMeta(t *testing.T) {
 func TestGetComplexTypeRefWithMeta(t *testing.T) {
 	client := newXMLClient()
 	result, err := client.GetComplexTypeRefWithMeta(context.Background(), nil)
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 	expected := RootWithRefAndMeta{
 		RefToModel: &ComplexTypeWithMeta{
-			ID: to.StringPtr("myid"),
+			ID: to.Ptr("myid"),
 		},
-		Something: to.StringPtr("else"),
+		Something: to.Ptr("else"),
 	}
 	if r := cmp.Diff(result.RootWithRefAndMeta, expected); r != "" {
 		t.Fatal(r)
@@ -100,13 +95,11 @@ func TestGetComplexTypeRefWithMeta(t *testing.T) {
 func TestGetEmptyChildElement(t *testing.T) {
 	client := newXMLClient()
 	result, err := client.GetEmptyChildElement(context.Background(), nil)
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 	expected := Banana{
-		Name:       to.StringPtr("Unknown Banana"),
+		Name:       to.Ptr("Unknown Banana"),
 		Expiration: toTimePtr(time.RFC3339Nano, "2012-02-24T00:53:52.789Z"),
-		Flavor:     to.StringPtr(""),
+		Flavor:     to.Ptr(""),
 	}
 	if r := cmp.Diff(result.Banana, expected); r != "" {
 		t.Fatal(r)
@@ -116,9 +109,7 @@ func TestGetEmptyChildElement(t *testing.T) {
 func TestGetEmptyList(t *testing.T) {
 	client := newXMLClient()
 	result, err := client.GetEmptyList(context.Background(), nil)
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 	expected := Slideshow{}
 	if r := cmp.Diff(result.Slideshow, expected); r != "" {
 		t.Fatal(r)
@@ -128,9 +119,7 @@ func TestGetEmptyList(t *testing.T) {
 func TestGetEmptyRootList(t *testing.T) {
 	client := newXMLClient()
 	result, err := client.GetEmptyRootList(context.Background(), nil)
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 	if result.Bananas != nil {
 		t.Fatal("expected nil slice")
 	}
@@ -139,9 +128,7 @@ func TestGetEmptyRootList(t *testing.T) {
 func TestGetEmptyWrappedLists(t *testing.T) {
 	client := newXMLClient()
 	result, err := client.GetEmptyWrappedLists(context.Background(), nil)
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 	expected := AppleBarrel{}
 	if r := cmp.Diff(result.AppleBarrel, expected); r != "" {
 		t.Fatal(r)
@@ -151,10 +138,8 @@ func TestGetEmptyWrappedLists(t *testing.T) {
 func TestGetHeaders(t *testing.T) {
 	client := newXMLClient()
 	result, err := client.GetHeaders(context.Background(), nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if r := cmp.Diff(result.CustomHeader, to.StringPtr("custom-value")); r != "" {
+	require.NoError(t, err)
+	if r := cmp.Diff(result.CustomHeader, to.Ptr("custom-value")); r != "" {
 		t.Fatal(r)
 	}
 }
@@ -162,18 +147,16 @@ func TestGetHeaders(t *testing.T) {
 func TestGetRootList(t *testing.T) {
 	client := newXMLClient()
 	result, err := client.GetRootList(context.Background(), nil)
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 	expected := []*Banana{
 		{
-			Name:       to.StringPtr("Cavendish"),
-			Flavor:     to.StringPtr("Sweet"),
+			Name:       to.Ptr("Cavendish"),
+			Flavor:     to.Ptr("Sweet"),
 			Expiration: toTimePtr(time.RFC3339Nano, "2018-02-28T00:40:00.123Z"),
 		},
 		{
-			Name:       to.StringPtr("Plantain"),
-			Flavor:     to.StringPtr("Savory"),
+			Name:       to.Ptr("Plantain"),
+			Flavor:     to.Ptr("Savory"),
 			Expiration: toTimePtr(time.RFC3339Nano, "2018-02-28T00:40:00.123Z"),
 		},
 	}
@@ -185,13 +168,11 @@ func TestGetRootList(t *testing.T) {
 func TestGetRootListSingleItem(t *testing.T) {
 	client := newXMLClient()
 	result, err := client.GetRootListSingleItem(context.Background(), nil)
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 	expected := []*Banana{
 		{
-			Name:       to.StringPtr("Cavendish"),
-			Flavor:     to.StringPtr("Sweet"),
+			Name:       to.Ptr("Cavendish"),
+			Flavor:     to.Ptr("Sweet"),
 			Expiration: toTimePtr(time.RFC3339Nano, "2018-02-28T00:40:00.123Z"),
 		},
 	}
@@ -203,36 +184,34 @@ func TestGetRootListSingleItem(t *testing.T) {
 func TestGetServiceProperties(t *testing.T) {
 	client := newXMLClient()
 	result, err := client.GetServiceProperties(context.Background(), nil)
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 	expected := StorageServiceProperties{
 		HourMetrics: &Metrics{
-			Version:     to.StringPtr("1.0"),
-			Enabled:     to.BoolPtr(true),
-			IncludeAPIs: to.BoolPtr(false),
+			Version:     to.Ptr("1.0"),
+			Enabled:     to.Ptr(true),
+			IncludeAPIs: to.Ptr(false),
 			RetentionPolicy: &RetentionPolicy{
-				Enabled: to.BoolPtr(true),
-				Days:    to.Int32Ptr(7),
+				Enabled: to.Ptr(true),
+				Days:    to.Ptr[int32](7),
 			},
 		},
 		Logging: &Logging{
-			Version: to.StringPtr("1.0"),
-			Delete:  to.BoolPtr(true),
-			Read:    to.BoolPtr(false),
-			Write:   to.BoolPtr(true),
+			Version: to.Ptr("1.0"),
+			Delete:  to.Ptr(true),
+			Read:    to.Ptr(false),
+			Write:   to.Ptr(true),
 			RetentionPolicy: &RetentionPolicy{
-				Enabled: to.BoolPtr(true),
-				Days:    to.Int32Ptr(7),
+				Enabled: to.Ptr(true),
+				Days:    to.Ptr[int32](7),
 			},
 		},
 		MinuteMetrics: &Metrics{
-			Version:     to.StringPtr("1.0"),
-			Enabled:     to.BoolPtr(true),
-			IncludeAPIs: to.BoolPtr(true),
+			Version:     to.Ptr("1.0"),
+			Enabled:     to.Ptr(true),
+			IncludeAPIs: to.Ptr(true),
 			RetentionPolicy: &RetentionPolicy{
-				Enabled: to.BoolPtr(true),
-				Days:    to.Int32Ptr(7),
+				Enabled: to.Ptr(true),
+				Days:    to.Ptr[int32](7),
 			},
 		},
 	}
@@ -244,22 +223,20 @@ func TestGetServiceProperties(t *testing.T) {
 func TestGetSimple(t *testing.T) {
 	client := newXMLClient()
 	result, err := client.GetSimple(context.Background(), nil)
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 	expected := Slideshow{
-		Author: to.StringPtr("Yours Truly"),
-		Date:   to.StringPtr("Date of publication"),
-		Title:  to.StringPtr("Sample Slide Show"),
+		Author: to.Ptr("Yours Truly"),
+		Date:   to.Ptr("Date of publication"),
+		Title:  to.Ptr("Sample Slide Show"),
 		Slides: []*Slide{
 			{
-				Title: to.StringPtr("Wake up to WonderWidgets!"),
-				Type:  to.StringPtr("all"),
+				Title: to.Ptr("Wake up to WonderWidgets!"),
+				Type:  to.Ptr("all"),
 			},
 			{
-				Items: to.StringPtrArray("Why WonderWidgets are great", "", "Who buys WonderWidgets"),
-				Title: to.StringPtr("Overview"),
-				Type:  to.StringPtr("all"),
+				Items: to.SliceOfPtrs("Why WonderWidgets are great", "", "Who buys WonderWidgets"),
+				Title: to.Ptr("Overview"),
+				Type:  to.Ptr("all"),
 			},
 		},
 	}
@@ -271,12 +248,10 @@ func TestGetSimple(t *testing.T) {
 func TestGetWrappedLists(t *testing.T) {
 	client := newXMLClient()
 	result, err := client.GetWrappedLists(context.Background(), nil)
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 	expected := AppleBarrel{
-		BadApples:  to.StringPtrArray("Red Delicious"),
-		GoodApples: to.StringPtrArray("Fuji", "Gala"),
+		BadApples:  to.SliceOfPtrs("Red Delicious"),
+		GoodApples: to.SliceOfPtrs("Fuji", "Gala"),
 	}
 	if r := cmp.Diff(result.AppleBarrel, expected); r != "" {
 		t.Fatal(r)
@@ -287,12 +262,10 @@ func TestGetXMsText(t *testing.T) {
 	t.Skip("support NYI")
 	client := newXMLClient()
 	result, err := client.GetXMsText(context.Background(), nil)
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 	expected := ObjectWithXMsTextProperty{
-		Content:  to.StringPtr("I am text"),
-		Language: to.StringPtr("english"),
+		Content:  to.Ptr("I am text"),
+		Language: to.Ptr("english"),
 	}
 	if r := cmp.Diff(result.ObjectWithXMsTextProperty, expected); r != "" {
 		t.Fatal(r)
@@ -302,24 +275,18 @@ func TestGetXMsText(t *testing.T) {
 func TestJSONInput(t *testing.T) {
 	client := newXMLClient()
 	result, err := client.JSONInput(context.Background(), JSONInput{
-		ID: to.Int32Ptr(42),
+		ID: to.Ptr[int32](42),
 	}, nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if !reflect.ValueOf(result).IsZero() {
-		t.Fatal("expected zero-value result")
-	}
+	require.NoError(t, err)
+	require.Zero(t, result)
 }
 
 func TestJSONOutput(t *testing.T) {
 	client := newXMLClient()
 	result, err := client.JSONOutput(context.Background(), nil)
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 	expected := JSONOutput{
-		ID: to.Int32Ptr(42),
+		ID: to.Ptr[int32](42),
 	}
 	if r := cmp.Diff(result.JSONOutput, expected); r != "" {
 		t.Fatal(r)
@@ -329,126 +296,120 @@ func TestJSONOutput(t *testing.T) {
 func TestListBlobs(t *testing.T) {
 	client := newXMLClient()
 	result, err := client.ListBlobs(context.Background(), nil)
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 	blob1LM, err := time.Parse(time.RFC1123, "Wed, 09 Sep 2009 09:20:02 GMT")
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 	blob2LM, err := time.Parse(time.RFC1123, "Wed, 09 Sep 2009 09:20:03 GMT")
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 	expected := ListBlobsResponse{
 		Blobs: &Blobs{
 			Blob: []*Blob{
 				{
 					Metadata: map[string]*string{
-						"color":            to.StringPtr("blue"),
-						"blobnumber":       to.StringPtr("01"),
-						"somemetadataname": to.StringPtr("SomeMetadataValue"),
+						"color":            to.Ptr("blue"),
+						"blobnumber":       to.Ptr("01"),
+						"somemetadataname": to.Ptr("SomeMetadataValue"),
 					},
-					Name: to.StringPtr("blob1.txt"),
+					Name: to.Ptr("blob1.txt"),
 					Properties: &BlobProperties{
 						LastModified:    &blob1LM,
-						Etag:            to.StringPtr("0x8CBFF45D8A29A19"),
-						ContentLength:   to.Int64Ptr(100),
-						ContentType:     to.StringPtr("text/html"),
-						ContentEncoding: to.StringPtr(""),
-						ContentLanguage: to.StringPtr("en-US"),
-						ContentMD5:      to.StringPtr(""),
-						CacheControl:    to.StringPtr("no-cache"),
-						BlobType:        BlobTypeBlockBlob.ToPtr(),
-						LeaseStatus:     LeaseStatusTypeUnlocked.ToPtr(),
+						Etag:            to.Ptr("0x8CBFF45D8A29A19"),
+						ContentLength:   to.Ptr[int64](100),
+						ContentType:     to.Ptr("text/html"),
+						ContentEncoding: to.Ptr(""),
+						ContentLanguage: to.Ptr("en-US"),
+						ContentMD5:      to.Ptr(""),
+						CacheControl:    to.Ptr("no-cache"),
+						BlobType:        to.Ptr(BlobTypeBlockBlob),
+						LeaseStatus:     to.Ptr(LeaseStatusTypeUnlocked),
 					},
 				},
 				{
 					Metadata: map[string]*string{
-						"color":             to.StringPtr("green"),
-						"blobnumber":        to.StringPtr("02"),
-						"somemetadataname":  to.StringPtr("SomeMetadataValue"),
-						"x-ms-invalid-name": to.StringPtr("nasdf$@#$$"),
+						"color":             to.Ptr("green"),
+						"blobnumber":        to.Ptr("02"),
+						"somemetadataname":  to.Ptr("SomeMetadataValue"),
+						"x-ms-invalid-name": to.Ptr("nasdf$@#$$"),
 					},
-					Name: to.StringPtr("blob2.txt"),
+					Name: to.Ptr("blob2.txt"),
 					Properties: &BlobProperties{
 						LastModified:    &blob1LM,
-						Etag:            to.StringPtr("0x8CBFF45D8B4C212"),
-						ContentLength:   to.Int64Ptr(5000),
-						ContentType:     to.StringPtr("application/octet-stream"),
-						ContentEncoding: to.StringPtr("gzip"),
-						ContentLanguage: to.StringPtr(""),
-						ContentMD5:      to.StringPtr(""),
-						CacheControl:    to.StringPtr(""),
-						BlobType:        BlobTypeBlockBlob.ToPtr(),
+						Etag:            to.Ptr("0x8CBFF45D8B4C212"),
+						ContentLength:   to.Ptr[int64](5000),
+						ContentType:     to.Ptr("application/octet-stream"),
+						ContentEncoding: to.Ptr("gzip"),
+						ContentLanguage: to.Ptr(""),
+						ContentMD5:      to.Ptr(""),
+						CacheControl:    to.Ptr(""),
+						BlobType:        to.Ptr(BlobTypeBlockBlob),
 					},
-					Snapshot: to.StringPtr("2009-09-09T09:20:03.0427659Z"),
+					Snapshot: to.Ptr("2009-09-09T09:20:03.0427659Z"),
 				},
 				{
 					Metadata: map[string]*string{
-						"color":            to.StringPtr("green"),
-						"blobnumber":       to.StringPtr("02"),
-						"somemetadataname": to.StringPtr("SomeMetadataValue"),
+						"color":            to.Ptr("green"),
+						"blobnumber":       to.Ptr("02"),
+						"somemetadataname": to.Ptr("SomeMetadataValue"),
 					},
-					Name: to.StringPtr("blob2.txt"),
+					Name: to.Ptr("blob2.txt"),
 					Properties: &BlobProperties{
 						LastModified:    &blob1LM,
-						Etag:            to.StringPtr("0x8CBFF45D8B4C212"),
-						ContentLength:   to.Int64Ptr(5000),
-						ContentType:     to.StringPtr("application/octet-stream"),
-						ContentEncoding: to.StringPtr("gzip"),
-						ContentLanguage: to.StringPtr(""),
-						ContentMD5:      to.StringPtr(""),
-						CacheControl:    to.StringPtr(""),
-						BlobType:        BlobTypeBlockBlob.ToPtr(),
+						Etag:            to.Ptr("0x8CBFF45D8B4C212"),
+						ContentLength:   to.Ptr[int64](5000),
+						ContentType:     to.Ptr("application/octet-stream"),
+						ContentEncoding: to.Ptr("gzip"),
+						ContentLanguage: to.Ptr(""),
+						ContentMD5:      to.Ptr(""),
+						CacheControl:    to.Ptr(""),
+						BlobType:        to.Ptr(BlobTypeBlockBlob),
 					},
-					Snapshot: to.StringPtr("2009-09-09T09:20:03.1587543Z"),
+					Snapshot: to.Ptr("2009-09-09T09:20:03.1587543Z"),
 				},
 				{
 					Metadata: map[string]*string{
-						"color":            to.StringPtr("green"),
-						"blobnumber":       to.StringPtr("02"),
-						"somemetadataname": to.StringPtr("SomeMetadataValue"),
+						"color":            to.Ptr("green"),
+						"blobnumber":       to.Ptr("02"),
+						"somemetadataname": to.Ptr("SomeMetadataValue"),
 					},
-					Name: to.StringPtr("blob2.txt"),
+					Name: to.Ptr("blob2.txt"),
 					Properties: &BlobProperties{
 						LastModified:    &blob1LM,
-						Etag:            to.StringPtr("0x8CBFF45D8B4C212"),
-						ContentLength:   to.Int64Ptr(5000),
-						ContentType:     to.StringPtr("application/octet-stream"),
-						ContentEncoding: to.StringPtr("gzip"),
-						ContentLanguage: to.StringPtr(""),
-						ContentMD5:      to.StringPtr(""),
-						CacheControl:    to.StringPtr(""),
-						BlobType:        BlobTypeBlockBlob.ToPtr(),
-						LeaseStatus:     LeaseStatusTypeUnlocked.ToPtr(),
+						Etag:            to.Ptr("0x8CBFF45D8B4C212"),
+						ContentLength:   to.Ptr[int64](5000),
+						ContentType:     to.Ptr("application/octet-stream"),
+						ContentEncoding: to.Ptr("gzip"),
+						ContentLanguage: to.Ptr(""),
+						ContentMD5:      to.Ptr(""),
+						CacheControl:    to.Ptr(""),
+						BlobType:        to.Ptr(BlobTypeBlockBlob),
+						LeaseStatus:     to.Ptr(LeaseStatusTypeUnlocked),
 					},
 				},
 				{
 					Metadata: map[string]*string{
-						"color":            to.StringPtr("yellow"),
-						"blobnumber":       to.StringPtr("03"),
-						"somemetadataname": to.StringPtr("SomeMetadataValue"),
+						"color":            to.Ptr("yellow"),
+						"blobnumber":       to.Ptr("03"),
+						"somemetadataname": to.Ptr("SomeMetadataValue"),
 					},
-					Name: to.StringPtr("blob3.txt"),
+					Name: to.Ptr("blob3.txt"),
 					Properties: &BlobProperties{
 						LastModified:       &blob2LM,
-						Etag:               to.StringPtr("0x8CBFF45D911FADF"),
-						ContentLength:      to.Int64Ptr(16384),
-						ContentType:        to.StringPtr("image/jpeg"),
-						ContentEncoding:    to.StringPtr(""),
-						ContentLanguage:    to.StringPtr(""),
-						ContentMD5:         to.StringPtr(""),
-						CacheControl:       to.StringPtr(""),
-						BlobSequenceNumber: to.Int32Ptr(3),
-						BlobType:           BlobTypePageBlob.ToPtr(),
-						LeaseStatus:        LeaseStatusTypeLocked.ToPtr(),
+						Etag:               to.Ptr("0x8CBFF45D911FADF"),
+						ContentLength:      to.Ptr[int64](16384),
+						ContentType:        to.Ptr("image/jpeg"),
+						ContentEncoding:    to.Ptr(""),
+						ContentLanguage:    to.Ptr(""),
+						ContentMD5:         to.Ptr(""),
+						CacheControl:       to.Ptr(""),
+						BlobSequenceNumber: to.Ptr[int32](3),
+						BlobType:           to.Ptr(BlobTypePageBlob),
+						LeaseStatus:        to.Ptr(LeaseStatusTypeLocked),
 					},
 				},
 			},
 		},
-		ContainerName: to.StringPtr("https://myaccount.blob.core.windows.net/mycontainer"),
-		NextMarker:    to.StringPtr(""),
+		ContainerName: to.Ptr("https://myaccount.blob.core.windows.net/mycontainer"),
+		NextMarker:    to.Ptr(""),
 	}
 	if r := cmp.Diff(result.ListBlobsResponse, expected); r != "" {
 		t.Fatal(r)
@@ -458,34 +419,32 @@ func TestListBlobs(t *testing.T) {
 func TestListContainers(t *testing.T) {
 	client := newXMLClient()
 	result, err := client.ListContainers(context.Background(), nil)
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 	expected := ListContainersResponse{
-		ServiceEndpoint: to.StringPtr("https://myaccount.blob.core.windows.net/"),
-		MaxResults:      to.Int32Ptr(3),
-		NextMarker:      to.StringPtr("video"),
+		ServiceEndpoint: to.Ptr("https://myaccount.blob.core.windows.net/"),
+		MaxResults:      to.Ptr[int32](3),
+		NextMarker:      to.Ptr("video"),
 		Containers: []*Container{
 			{
-				Name: to.StringPtr("audio"),
+				Name: to.Ptr("audio"),
 				Properties: &ContainerProperties{
 					LastModified: toTimePtr(time.RFC1123, "Wed, 26 Oct 2016 20:39:39 GMT"),
-					Etag:         to.StringPtr("0x8CACB9BD7C6B1B2"),
-					PublicAccess: PublicAccessTypeContainer.ToPtr(),
+					Etag:         to.Ptr("0x8CACB9BD7C6B1B2"),
+					PublicAccess: to.Ptr(PublicAccessTypeContainer),
 				},
 			},
 			{
-				Name: to.StringPtr("images"),
+				Name: to.Ptr("images"),
 				Properties: &ContainerProperties{
 					LastModified: toTimePtr(time.RFC1123, "Wed, 26 Oct 2016 20:39:39 GMT"),
-					Etag:         to.StringPtr("0x8CACB9BD7C1EEEC"),
+					Etag:         to.Ptr("0x8CACB9BD7C1EEEC"),
 				},
 			},
 			{
-				Name: to.StringPtr("textfiles"),
+				Name: to.Ptr("textfiles"),
 				Properties: &ContainerProperties{
 					LastModified: toTimePtr(time.RFC1123, "Wed, 26 Oct 2016 20:39:39 GMT"),
-					Etag:         to.StringPtr("0x8CACB9BD7BACAC3"),
+					Etag:         to.Ptr("0x8CACB9BD7BACAC3"),
 				},
 			},
 		},
@@ -499,20 +458,16 @@ func TestPutACLs(t *testing.T) {
 	client := newXMLClient()
 	result, err := client.PutACLs(context.Background(), []*SignedIdentifier{
 		{
-			ID: to.StringPtr("MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI="),
+			ID: to.Ptr("MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI="),
 			AccessPolicy: &AccessPolicy{
 				Start:      toTimePtr(time.RFC3339Nano, "2009-09-28T08:49:37.123Z"),
 				Expiry:     toTimePtr(time.RFC3339Nano, "2009-09-29T08:49:37.123Z"),
-				Permission: to.StringPtr("rwd"),
+				Permission: to.Ptr("rwd"),
 			},
 		},
 	}, nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if !reflect.ValueOf(result).IsZero() {
-		t.Fatal("expected zero-value result")
-	}
+	require.NoError(t, err)
+	require.Zero(t, result)
 }
 
 func TestPutBinary(t *testing.T) {
@@ -520,56 +475,42 @@ func TestPutBinary(t *testing.T) {
 	_, err := client.PutBinary(context.Background(), ModelWithByteProperty{
 		Bytes: []byte("Hello world"),
 	}, nil)
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 }
 
 func TestPutComplexTypeRefNoMeta(t *testing.T) {
 	client := newXMLClient()
 	result, err := client.PutComplexTypeRefNoMeta(context.Background(), RootWithRefAndNoMeta{
 		RefToModel: &ComplexTypeNoMeta{
-			ID: to.StringPtr("myid"),
+			ID: to.Ptr("myid"),
 		},
-		Something: to.StringPtr("else"),
+		Something: to.Ptr("else"),
 	}, nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if !reflect.ValueOf(result).IsZero() {
-		t.Fatal("expected zero-value result")
-	}
+	require.NoError(t, err)
+	require.Zero(t, result)
 }
 
 func TestPutComplexTypeRefWithMeta(t *testing.T) {
 	client := newXMLClient()
 	result, err := client.PutComplexTypeRefWithMeta(context.Background(), RootWithRefAndMeta{
 		RefToModel: &ComplexTypeWithMeta{
-			ID: to.StringPtr("myid"),
+			ID: to.Ptr("myid"),
 		},
-		Something: to.StringPtr("else"),
+		Something: to.Ptr("else"),
 	}, nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if !reflect.ValueOf(result).IsZero() {
-		t.Fatal("expected zero-value result")
-	}
+	require.NoError(t, err)
+	require.Zero(t, result)
 }
 
 func TestPutEmptyChildElement(t *testing.T) {
 	client := newXMLClient()
 	result, err := client.PutEmptyChildElement(context.Background(), Banana{
-		Name:       to.StringPtr("Unknown Banana"),
+		Name:       to.Ptr("Unknown Banana"),
 		Expiration: toTimePtr(time.RFC3339Nano, "2012-02-24T00:53:52.789Z"),
-		Flavor:     to.StringPtr(""),
+		Flavor:     to.Ptr(""),
 	}, nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if !reflect.ValueOf(result).IsZero() {
-		t.Fatal("expected zero-value result")
-	}
+	require.NoError(t, err)
+	require.Zero(t, result)
 }
 
 func TestPutEmptyList(t *testing.T) {
@@ -577,23 +518,15 @@ func TestPutEmptyList(t *testing.T) {
 	result, err := client.PutEmptyList(context.Background(), Slideshow{
 		Slides: []*Slide{},
 	}, nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if !reflect.ValueOf(result).IsZero() {
-		t.Fatal("expected zero-value result")
-	}
+	require.NoError(t, err)
+	require.Zero(t, result)
 }
 
 func TestPutEmptyRootList(t *testing.T) {
 	client := newXMLClient()
 	result, err := client.PutEmptyRootList(context.Background(), []*Banana{}, nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if !reflect.ValueOf(result).IsZero() {
-		t.Fatal("expected zero-value result")
-	}
+	require.NoError(t, err)
+	require.Zero(t, result)
 }
 
 func TestPutEmptyWrappedLists(t *testing.T) {
@@ -602,129 +535,105 @@ func TestPutEmptyWrappedLists(t *testing.T) {
 		BadApples:  []*string{},
 		GoodApples: []*string{},
 	}, nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if !reflect.ValueOf(result).IsZero() {
-		t.Fatal("expected zero-value result")
-	}
+	require.NoError(t, err)
+	require.Zero(t, result)
 }
 
 func TestPutRootList(t *testing.T) {
 	client := newXMLClient()
 	result, err := client.PutRootList(context.Background(), []*Banana{
 		{
-			Name:       to.StringPtr("Cavendish"),
-			Flavor:     to.StringPtr("Sweet"),
+			Name:       to.Ptr("Cavendish"),
+			Flavor:     to.Ptr("Sweet"),
 			Expiration: toTimePtr(time.RFC3339Nano, "2018-02-28T00:40:00.123Z"),
 		},
 		{
-			Name:       to.StringPtr("Plantain"),
-			Flavor:     to.StringPtr("Savory"),
+			Name:       to.Ptr("Plantain"),
+			Flavor:     to.Ptr("Savory"),
 			Expiration: toTimePtr(time.RFC3339Nano, "2018-02-28T00:40:00.123Z"),
 		},
 	}, nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if !reflect.ValueOf(result).IsZero() {
-		t.Fatal("expected zero-value result")
-	}
+	require.NoError(t, err)
+	require.Zero(t, result)
 }
 
 func TestPutRootListSingleItem(t *testing.T) {
 	client := newXMLClient()
 	result, err := client.PutRootListSingleItem(context.Background(), []*Banana{
 		{
-			Name:       to.StringPtr("Cavendish"),
-			Flavor:     to.StringPtr("Sweet"),
+			Name:       to.Ptr("Cavendish"),
+			Flavor:     to.Ptr("Sweet"),
 			Expiration: toTimePtr(time.RFC3339Nano, "2018-02-28T00:40:00.123Z"),
 		},
 	}, nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if !reflect.ValueOf(result).IsZero() {
-		t.Fatal("expected zero-value result")
-	}
+	require.NoError(t, err)
+	require.Zero(t, result)
 }
 
 func TestPutServiceProperties(t *testing.T) {
 	client := newXMLClient()
 	result, err := client.PutServiceProperties(context.Background(), StorageServiceProperties{
 		HourMetrics: &Metrics{
-			Version:     to.StringPtr("1.0"),
-			Enabled:     to.BoolPtr(true),
-			IncludeAPIs: to.BoolPtr(false),
+			Version:     to.Ptr("1.0"),
+			Enabled:     to.Ptr(true),
+			IncludeAPIs: to.Ptr(false),
 			RetentionPolicy: &RetentionPolicy{
-				Enabled: to.BoolPtr(true),
-				Days:    to.Int32Ptr(7),
+				Enabled: to.Ptr(true),
+				Days:    to.Ptr[int32](7),
 			},
 		},
 		Logging: &Logging{
-			Version: to.StringPtr("1.0"),
-			Delete:  to.BoolPtr(true),
-			Read:    to.BoolPtr(false),
-			Write:   to.BoolPtr(true),
+			Version: to.Ptr("1.0"),
+			Delete:  to.Ptr(true),
+			Read:    to.Ptr(false),
+			Write:   to.Ptr(true),
 			RetentionPolicy: &RetentionPolicy{
-				Enabled: to.BoolPtr(true),
-				Days:    to.Int32Ptr(7),
+				Enabled: to.Ptr(true),
+				Days:    to.Ptr[int32](7),
 			},
 		},
 		MinuteMetrics: &Metrics{
-			Version:     to.StringPtr("1.0"),
-			Enabled:     to.BoolPtr(true),
-			IncludeAPIs: to.BoolPtr(true),
+			Version:     to.Ptr("1.0"),
+			Enabled:     to.Ptr(true),
+			IncludeAPIs: to.Ptr(true),
 			RetentionPolicy: &RetentionPolicy{
-				Enabled: to.BoolPtr(true),
-				Days:    to.Int32Ptr(7),
+				Enabled: to.Ptr(true),
+				Days:    to.Ptr[int32](7),
 			},
 		},
 	}, nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if !reflect.ValueOf(result).IsZero() {
-		t.Fatal("expected zero-value result")
-	}
+	require.NoError(t, err)
+	require.Zero(t, result)
 }
 
 func TestPutSimple(t *testing.T) {
 	client := newXMLClient()
 	result, err := client.PutSimple(context.Background(), Slideshow{
-		Author: to.StringPtr("Yours Truly"),
-		Date:   to.StringPtr("Date of publication"),
-		Title:  to.StringPtr("Sample Slide Show"),
+		Author: to.Ptr("Yours Truly"),
+		Date:   to.Ptr("Date of publication"),
+		Title:  to.Ptr("Sample Slide Show"),
 		Slides: []*Slide{
 			{
-				Title: to.StringPtr("Wake up to WonderWidgets!"),
-				Type:  to.StringPtr("all"),
+				Title: to.Ptr("Wake up to WonderWidgets!"),
+				Type:  to.Ptr("all"),
 			},
 			{
-				Items: to.StringPtrArray("Why WonderWidgets are great", "", "Who buys WonderWidgets"),
-				Title: to.StringPtr("Overview"),
-				Type:  to.StringPtr("all"),
+				Items: to.SliceOfPtrs("Why WonderWidgets are great", "", "Who buys WonderWidgets"),
+				Title: to.Ptr("Overview"),
+				Type:  to.Ptr("all"),
 			},
 		},
 	}, nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if !reflect.ValueOf(result).IsZero() {
-		t.Fatal("expected zero-value result")
-	}
+	require.NoError(t, err)
+	require.Zero(t, result)
 }
 
 func TestPutWrappedLists(t *testing.T) {
 	client := newXMLClient()
 	result, err := client.PutWrappedLists(context.Background(), AppleBarrel{
-		BadApples:  to.StringPtrArray("Red Delicious"),
-		GoodApples: to.StringPtrArray("Fuji", "Gala"),
+		BadApples:  to.SliceOfPtrs("Red Delicious"),
+		GoodApples: to.SliceOfPtrs("Fuji", "Gala"),
 	}, nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if !reflect.ValueOf(result).IsZero() {
-		t.Fatal("expected zero-value result")
-	}
+	require.NoError(t, err)
+	require.Zero(t, result)
 }

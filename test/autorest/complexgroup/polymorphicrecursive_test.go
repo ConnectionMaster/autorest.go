@@ -5,86 +5,88 @@ package complexgroup
 
 import (
 	"context"
-	"reflect"
+	"generatortests"
 	"testing"
 	"time"
 
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore/runtime"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	"github.com/google/go-cmp/cmp"
+	"github.com/stretchr/testify/require"
 )
 
 func newPolymorphicrecursiveClient() *PolymorphicrecursiveClient {
-	return NewPolymorphicrecursiveClient(nil)
+	pl := runtime.NewPipeline(generatortests.ModuleName, generatortests.ModuleVersion, runtime.PipelineOptions{}, &azcore.ClientOptions{})
+	return NewPolymorphicrecursiveClient(pl)
 }
 
 // GetValid - Get complex types that are polymorphic and have recursive references
 func TestGetValid(t *testing.T) {
 	client := newPolymorphicrecursiveClient()
 	result, err := client.GetValid(context.Background(), nil)
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 	sawBday := time.Date(1900, time.January, 5, 1, 0, 0, 0, time.UTC)
 	sharkBday := time.Date(2012, time.January, 5, 1, 0, 0, 0, time.UTC)
 	if r := cmp.Diff(result.FishClassification, &Salmon{
-		Fishtype: to.StringPtr("salmon"),
-		Length:   to.Float32Ptr(1),
+		Fishtype: to.Ptr("salmon"),
+		Length:   to.Ptr[float32](1),
 		Siblings: []FishClassification{
 			&Shark{
-				Fishtype: to.StringPtr("shark"),
-				Length:   to.Float32Ptr(20),
+				Fishtype: to.Ptr("shark"),
+				Length:   to.Ptr[float32](20),
 				Siblings: []FishClassification{
 					&Salmon{
-						Fishtype: to.StringPtr("salmon"),
-						Length:   to.Float32Ptr(2),
+						Fishtype: to.Ptr("salmon"),
+						Length:   to.Ptr[float32](2),
 						Siblings: []FishClassification{
 							&Shark{
-								Fishtype: to.StringPtr("shark"),
-								Length:   to.Float32Ptr(20),
-								Species:  to.StringPtr("predator"),
-								Age:      to.Int32Ptr(6),
+								Fishtype: to.Ptr("shark"),
+								Length:   to.Ptr[float32](20),
+								Species:  to.Ptr("predator"),
+								Age:      to.Ptr[int32](6),
 								Birthday: &sharkBday,
 							},
 							&Sawshark{
-								Fishtype: to.StringPtr("sawshark"),
-								Length:   to.Float32Ptr(10),
-								Species:  to.StringPtr("dangerous"),
-								Age:      to.Int32Ptr(105),
+								Fishtype: to.Ptr("sawshark"),
+								Length:   to.Ptr[float32](10),
+								Species:  to.Ptr("dangerous"),
+								Age:      to.Ptr[int32](105),
 								Birthday: &sawBday,
 								Picture:  []byte{255, 255, 255, 255, 254},
 							},
 						},
-						Species:  to.StringPtr("coho"),
-						Iswild:   to.BoolPtr(true),
-						Location: to.StringPtr("atlantic"),
+						Species:  to.Ptr("coho"),
+						Iswild:   to.Ptr(true),
+						Location: to.Ptr("atlantic"),
 					},
 					&Sawshark{
-						Fishtype: to.StringPtr("sawshark"),
-						Length:   to.Float32Ptr(10),
+						Fishtype: to.Ptr("sawshark"),
+						Length:   to.Ptr[float32](10),
 						Siblings: []FishClassification{},
-						Species:  to.StringPtr("dangerous"),
-						Age:      to.Int32Ptr(105),
+						Species:  to.Ptr("dangerous"),
+						Age:      to.Ptr[int32](105),
 						Birthday: &sawBday,
 						Picture:  []byte{255, 255, 255, 255, 254},
 					},
 				},
-				Species:  to.StringPtr("predator"),
-				Age:      to.Int32Ptr(6),
+				Species:  to.Ptr("predator"),
+				Age:      to.Ptr[int32](6),
 				Birthday: &sharkBday,
 			},
 			&Sawshark{
-				Fishtype: to.StringPtr("sawshark"),
-				Length:   to.Float32Ptr(10),
+				Fishtype: to.Ptr("sawshark"),
+				Length:   to.Ptr[float32](10),
 				Siblings: []FishClassification{},
-				Species:  to.StringPtr("dangerous"),
-				Age:      to.Int32Ptr(105),
+				Species:  to.Ptr("dangerous"),
+				Age:      to.Ptr[int32](105),
 				Birthday: &sawBday,
 				Picture:  []byte{255, 255, 255, 255, 254},
 			},
 		},
-		Species:  to.StringPtr("king"),
-		Iswild:   to.BoolPtr(true),
-		Location: to.StringPtr("alaska"),
+		Species:  to.Ptr("king"),
+		Iswild:   to.Ptr(true),
+		Location: to.Ptr("alaska"),
 	}); r != "" {
 		t.Fatal(r)
 	}
@@ -96,69 +98,65 @@ func TestPutValid(t *testing.T) {
 	sawBday := time.Date(1900, time.January, 5, 1, 0, 0, 0, time.UTC)
 	sharkBday := time.Date(2012, time.January, 5, 1, 0, 0, 0, time.UTC)
 	result, err := client.PutValid(context.Background(), &Salmon{
-		Fishtype: to.StringPtr("salmon"),
-		Length:   to.Float32Ptr(1),
+		Fishtype: to.Ptr("salmon"),
+		Length:   to.Ptr[float32](1),
 		Siblings: []FishClassification{
 			&Shark{
-				Fishtype: to.StringPtr("shark"),
-				Length:   to.Float32Ptr(20),
+				Fishtype: to.Ptr("shark"),
+				Length:   to.Ptr[float32](20),
 				Siblings: []FishClassification{
 					&Salmon{
-						Fishtype: to.StringPtr("salmon"),
-						Length:   to.Float32Ptr(2),
+						Fishtype: to.Ptr("salmon"),
+						Length:   to.Ptr[float32](2),
 						Siblings: []FishClassification{
 							&Shark{
-								Fishtype: to.StringPtr("shark"),
-								Length:   to.Float32Ptr(20),
-								Species:  to.StringPtr("predator"),
-								Age:      to.Int32Ptr(6),
+								Fishtype: to.Ptr("shark"),
+								Length:   to.Ptr[float32](20),
+								Species:  to.Ptr("predator"),
+								Age:      to.Ptr[int32](6),
 								Birthday: &sharkBday,
 							},
 							&Sawshark{
-								Fishtype: to.StringPtr("sawshark"),
-								Length:   to.Float32Ptr(10),
-								Species:  to.StringPtr("dangerous"),
-								Age:      to.Int32Ptr(105),
+								Fishtype: to.Ptr("sawshark"),
+								Length:   to.Ptr[float32](10),
+								Species:  to.Ptr("dangerous"),
+								Age:      to.Ptr[int32](105),
 								Birthday: &sawBday,
 								Picture:  []byte{255, 255, 255, 255, 254},
 							},
 						},
-						Species:  to.StringPtr("coho"),
-						Iswild:   to.BoolPtr(true),
-						Location: to.StringPtr("atlantic"),
+						Species:  to.Ptr("coho"),
+						Iswild:   to.Ptr(true),
+						Location: to.Ptr("atlantic"),
 					},
 					&Sawshark{
-						Fishtype: to.StringPtr("sawshark"),
-						Length:   to.Float32Ptr(10),
+						Fishtype: to.Ptr("sawshark"),
+						Length:   to.Ptr[float32](10),
 						Siblings: []FishClassification{},
-						Species:  to.StringPtr("dangerous"),
-						Age:      to.Int32Ptr(105),
+						Species:  to.Ptr("dangerous"),
+						Age:      to.Ptr[int32](105),
 						Birthday: &sawBday,
 						Picture:  []byte{255, 255, 255, 255, 254},
 					},
 				},
-				Species:  to.StringPtr("predator"),
-				Age:      to.Int32Ptr(6),
+				Species:  to.Ptr("predator"),
+				Age:      to.Ptr[int32](6),
 				Birthday: &sharkBday,
 			},
 			&Sawshark{
-				Fishtype: to.StringPtr("sawshark"),
-				Length:   to.Float32Ptr(10),
+				Fishtype: to.Ptr("sawshark"),
+				Length:   to.Ptr[float32](10),
 				Siblings: []FishClassification{},
-				Species:  to.StringPtr("dangerous"),
-				Age:      to.Int32Ptr(105),
+				Species:  to.Ptr("dangerous"),
+				Age:      to.Ptr[int32](105),
 				Birthday: &sawBday,
 				Picture:  []byte{255, 255, 255, 255, 254},
 			},
 		},
-		Species:  to.StringPtr("king"),
-		Iswild:   to.BoolPtr(true),
-		Location: to.StringPtr("alaska"),
+		Species:  to.Ptr("king"),
+		Iswild:   to.Ptr(true),
+		Location: to.Ptr("alaska"),
 	}, nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if !reflect.ValueOf(result).IsZero() {
-		t.Fatal("expected zero-value result")
-	}
+	require.NoError(t, err)
+	require.Zero(t, result)
 }

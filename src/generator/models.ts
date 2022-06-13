@@ -5,9 +5,9 @@
 
 import { Session } from '@autorest/extension-base';
 import { capitalize, comment } from '@azure-tools/codegen';
-import { ByteArraySchema, CodeModel, DictionarySchema, GroupProperty, ObjectSchema, Language, SchemaType, Parameter, Property } from '@autorest/codemodel';
+import { ByteArraySchema, CodeModel, ConstantSchema, DictionarySchema, GroupProperty, ObjectSchema, Language, SchemaType, Parameter, Property } from '@autorest/codemodel';
 import { values } from '@azure-tools/linq';
-import { isArraySchema, isDictionarySchema, isObjectSchema, hasAdditionalProperties, hasPolymorphicField, commentLength } from '../common/helpers';
+import { formatConstantValue, isArraySchema, isDictionarySchema, isObjectSchema, commentLength } from '../common/helpers';
 import { contentPreamble, sortAscending } from './helpers';
 import { ImportManager } from './imports';
 import { generateStruct, getXMLSerialization, StructDef, StructMethod } from './structs';
@@ -42,17 +42,24 @@ export async function generateModels(session: Session<CodeModel>): Promise<model
   for (const struct of values(structs)) {
     modelText += struct.discriminator();
     modelText += struct.text();
+
     struct.Methods.sort((a: StructMethod, b: StructMethod) => { return sortAscending(a.name, b.name) });
     for (const method of values(struct.Methods)) {
+      if (method.desc.length > 0) {
+        modelText += `${comment(method.desc, '// ', undefined, commentLength)}\n`;
+      }
+      modelText += method.text;
+    }
+
+    struct.SerDeMethods.sort((a: StructMethod, b: StructMethod) => { return sortAscending(a.name, b.name) });
+    for (const method of values(struct.SerDeMethods)) {
       if (method.desc.length > 0) {
         serdeTextBody += `${comment(method.desc, '// ', undefined, commentLength)}\n`;
       }
       serdeTextBody += method.text;
     }
-    if (struct.HasJSONMarshaller) {
+    if (struct.SerDeMethods.length > 0) {
       needsJSONPopulate = true;
-    }
-    if (struct.HasJSONUnmarshaller) {
       needsJSONUnpopulate = true;
     }
     if (struct.HasJSONByteArray) {
@@ -83,11 +90,15 @@ export async function generateModels(session: Session<CodeModel>): Promise<model
     serdeTextBody += '}\n\n';
   }
   if (needsJSONUnpopulate) {
-    serdeTextBody += 'func unpopulate(data json.RawMessage, v interface{}) error {\n';
+    serdeImports.add('fmt');
+    serdeTextBody += 'func unpopulate(data json.RawMessage, fn string, v interface{}) error {\n';
     serdeTextBody += '\tif data == nil {\n';
     serdeTextBody += '\t\treturn nil\n';
     serdeTextBody += '\t}\n';
-    serdeTextBody += '\treturn json.Unmarshal(data, v)\n';
+    serdeTextBody += '\tif err := json.Unmarshal(data, v); err != nil {\n';
+    serdeTextBody += '\t\treturn fmt.Errorf("struct field %s: %v", fn, err)\n';
+    serdeTextBody += '\t}\n';
+    serdeTextBody += '\treturn nil\n';
     serdeTextBody += '}\n\n';
   }
   let serdeText = '';
@@ -134,80 +145,16 @@ function generateStructs(modelImports: ImportManager, serdeImports: ImportManage
         generateDiscriminatorMarkerMethod(parent, structDef);
       }
     }
-    const needs = determineMarshallers(obj);
-    if (needs.M) {
-      serdeImports.add('reflect');
-      serdeImports.add('github.com/Azure/azure-sdk-for-go/sdk/azcore');
-      structDef.HasJSONMarshaller = true;
-      if (obj.language.go!.byteArrayFormat) {
-        structDef.HasJSONByteArray = true;
-      }
-      generateJSONMarshaller(serdeImports, obj, structDef);
+    serdeImports.add('reflect');
+    serdeImports.add('github.com/Azure/azure-sdk-for-go/sdk/azcore');
+    if (obj.language.go!.byteArrayFormat) {
+      structDef.HasJSONByteArray = true;
     }
-    if (needs.U) {
-      structDef.HasJSONUnmarshaller = true;
-      generateJSONUnmarshaller(serdeImports, structDef);
-    }
+    generateJSONMarshaller(serdeImports, obj, structDef);
+    generateJSONUnmarshaller(serdeImports, structDef);
     structTypes.push(structDef);
   }
   return structTypes;
-}
-
-interface Marshallers {
-  M: boolean
-  U: boolean
-}
-
-function mergeMarshallers(lhs: Marshallers, rhs: Marshallers): Marshallers {
-  return {
-    M: lhs.M || rhs.M,
-    U: lhs.U || rhs.U
-  }
-}
-
-// determines the marshallers needed for the specified object.
-// it examines the object and all its parents.
-function determineMarshallers(obj: ObjectSchema): Marshallers {
-  let result = determineMarshallersForObj(obj);
-  for (const parent of values(obj.parents?.all)) {
-    if (isObjectSchema(parent)) {
-      result = mergeMarshallers(result, determineMarshallersForObj(parent))
-    }
-  }
-  return result;
-}
-
-// determines the marshallers needed for this specific object.
-// it does not look at the object graph or consider inheritance.
-function determineMarshallersForObj(obj: ObjectSchema): Marshallers {
-  // things that require custom marshalling and/or unmarshalling:
-  //   needsDateTimeMarshalling M, U
-  //   needsDateMarshalling     M, U
-  //   needsUnixTimeMarshalling M, U
-  //   hasAdditionalProperties  M, U
-  //   hasPolymorphicField      M, U
-  //   discriminatorValue       M, U
-  //   byteArrayFormat          M, U
-  //   hasArrayMap              M
-  //   needsPatchMarshaller     M
-
-  let needsM = false, needsU = false;
-  if (obj.language.go!.needsDateTimeMarshalling ||
-    obj.language.go!.needsDateMarshalling ||
-    obj.language.go!.needsUnixTimeMarshalling ||
-    hasAdditionalProperties(obj) ||
-    hasPolymorphicField(obj) ||
-    obj.discriminatorValue ||
-    obj.language.go!.byteArrayFormat) {
-    needsM = needsU = true;
-  } else if (obj.language.go!.hasArrayMap ||
-    obj.language.go!.needsPatchMarshaller) {
-    needsM = true;
-  }
-  return {
-    M: needsM,
-    U: needsU,
-  }
 }
 
 function needsXMLDictionaryUnmarshalling(obj: ObjectSchema): boolean {
@@ -297,7 +244,7 @@ if (!obj.discriminatorValue && (!structDef.Properties || structDef.Properties.le
   marshaller += generateJSONMarshallerBody(obj, structDef, imports);
   marshaller += '\treturn json.Marshal(objectMap)\n';
   marshaller += '}\n\n';
-  structDef.Methods.push({ name: 'MarshalJSON', desc: `MarshalJSON implements the json.Marshaller interface for type ${typeName}.`, text: marshaller });
+  structDef.SerDeMethods.push({ name: 'MarshalJSON', desc: `MarshalJSON implements the json.Marshaller interface for type ${typeName}.`, text: marshaller });
 }
 
 function generateJSONMarshallerBody(obj: ObjectSchema, structDef: StructDef, imports: ImportManager): string {
@@ -331,6 +278,8 @@ function generateJSONMarshallerBody(obj: ObjectSchema, structDef: StructDef, imp
       marshaller += `\t\taux[i] = (*${prop.schema.elementType.language.go!.internalTimeType})(${source}[i])\n`;
       marshaller += '\t}\n';
       marshaller += `\tpopulate(objectMap, "${prop.serializedName}", aux)\n`;
+    } else if (prop.schema.type === SchemaType.Constant) {
+      marshaller += `\tobjectMap["${prop.serializedName}"] = ${formatConstantValue(<ConstantSchema>prop.schema)}\n`;
     } else {
       let populate = 'populate';
       let addr = '';
@@ -364,16 +313,17 @@ function generateJSONUnmarshaller(imports: ImportManager, structDef: StructDef) 
     return;
   }
   imports.add('encoding/json');
+  imports.add('fmt');
   const typeName = structDef.Language.name;
   const receiver = structDef.receiverName();
   let unmarshaller = `func (${receiver} *${typeName}) UnmarshalJSON(data []byte) error {\n`;
   unmarshaller += '\tvar rawMsg map[string]json.RawMessage\n';
   unmarshaller += '\tif err := json.Unmarshal(data, &rawMsg); err != nil {\n';
-  unmarshaller += '\t\treturn err\n';
+  unmarshaller += `\t\treturn fmt.Errorf("unmarshalling type %T: %v", ${receiver}, err)\n`;
   unmarshaller += '\t}\n';
   unmarshaller += generateJSONUnmarshallerBody(structDef, imports);
   unmarshaller += '}\n\n';
-  structDef.Methods.push({ name: 'UnmarshalJSON', desc: `UnmarshalJSON implements the json.Unmarshaller interface for type ${typeName}.`, text: unmarshaller });
+  structDef.SerDeMethods.push({ name: 'UnmarshalJSON', desc: `UnmarshalJSON implements the json.Unmarshaller interface for type ${typeName}.`, text: unmarshaller });
 }
 
 function generateJSONUnmarshallerBody(structDef: StructDef, imports: ImportManager): string {
@@ -391,6 +341,7 @@ function generateJSONUnmarshallerBody(structDef: StructDef, imports: ImportManag
     let auxType = addlProps.elementType.language.go!.name;
     let assignment = `${ref}aux`;
     if (addlProps.elementType.language.go!.internalTimeType) {
+      imports.add('time');
       auxType = addlProps.elementType.language.go!.internalTimeType;
       assignment = `(*time.Time)(${assignment})`;
     }
@@ -419,10 +370,11 @@ function generateJSONUnmarshallerBody(structDef: StructDef, imports: ImportManag
     } else if (isDictionarySchema(prop.schema) && prop.schema.elementType.language.go!.discriminatorInterface) {
       unmarshalBody += `\t\t\t\t${receiver}.${prop.language.go!.name}, err = unmarshal${prop.schema.elementType.language.go!.discriminatorInterface}Map(val)\n`;
     } else if (prop.schema.language.go!.internalTimeType) {
-      unmarshalBody += `\t\t\t\terr = unpopulate${capitalize(prop.schema.language.go!.internalTimeType)}(val, &${receiver}.${prop.language.go!.name})\n`;
+      unmarshalBody += `\t\t\t\terr = unpopulate${capitalize(prop.schema.language.go!.internalTimeType)}(val, "${prop.language.go!.name}", &${receiver}.${prop.language.go!.name})\n`;
     } else if (isArraySchema(prop.schema) && prop.schema.elementType.language.go!.internalTimeType) {
+      imports.add('time');
       unmarshalBody += `\t\t\tvar aux []*${prop.schema.elementType.language.go!.internalTimeType}\n`;
-      unmarshalBody += '\t\t\terr = unpopulate(val, &aux)\n';
+      unmarshalBody += `\t\t\terr = unpopulate(val, "${prop.language.go!.name}", &aux)\n`;
       unmarshalBody += '\t\t\tfor _, au := range aux {\n';
       unmarshalBody += `\t\t\t\t${receiver}.${prop.language.go!.name} = append(${receiver}.${prop.language.go!.name}, (*time.Time)(au))\n`;
       unmarshalBody += '\t\t\t}\n';
@@ -434,7 +386,7 @@ function generateJSONUnmarshallerBody(structDef: StructDef, imports: ImportManag
       imports.add('github.com/Azure/azure-sdk-for-go/sdk/azcore/runtime');
       unmarshalBody += `\t\t\terr = runtime.DecodeByteArray(string(val), &${receiver}.${prop.language.go!.name}, runtime.Base64${base64Format}Format)\n`;
     } else {
-      unmarshalBody += `\t\t\t\terr = unpopulate(val, &${receiver}.${prop.language.go!.name})\n`;
+      unmarshalBody += `\t\t\t\terr = unpopulate(val, "${prop.language.go!.name}", &${receiver}.${prop.language.go!.name})\n`;
     }
     unmarshalBody += '\t\t\t\tdelete(rawMsg, key)\n';
   }
@@ -444,7 +396,7 @@ function generateJSONUnmarshallerBody(structDef: StructDef, imports: ImportManag
   }
   unmarshalBody += '\t\t}\n';
   unmarshalBody += '\t\tif err != nil {\n';
-  unmarshalBody += '\t\t\treturn err\n';
+  unmarshalBody += `\t\t\treturn fmt.Errorf("unmarshalling type %T: %v", ${receiver}, err)\n`;
   unmarshalBody += '\t\t}\n';
   unmarshalBody += '\t}\n'; // end for key, val := range rawMsg
   unmarshalBody += '\treturn nil\n';
@@ -479,7 +431,7 @@ function generateXMLMarshaller(structDef: StructDef, imports: ImportManager) {
   }
   text += '\treturn e.EncodeElement(aux, start)\n';
   text += '}\n\n';
-  structDef.Methods.push({ name: 'MarshalXML', desc: desc, text: text });
+  structDef.SerDeMethods.push({ name: 'MarshalXML', desc: desc, text: text });
 }
 
 function generateXMLUnmarshaller(structDef: StructDef, imports: ImportManager) {
@@ -511,7 +463,7 @@ function generateXMLUnmarshaller(structDef: StructDef, imports: ImportManager) {
   }
   text += '\treturn nil\n';
   text += '}\n\n';
-  structDef.Methods.push({ name: 'UnmarshalXML', desc: desc, text: text });
+  structDef.SerDeMethods.push({ name: 'UnmarshalXML', desc: desc, text: text });
 }
 
 // generates an alias type used by custom XML marshaller/unmarshaller

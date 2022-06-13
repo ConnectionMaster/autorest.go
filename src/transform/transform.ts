@@ -5,9 +5,9 @@
 
 import { capitalize, KnownMediaType, serialize } from '@azure-tools/codegen';
 import { AutorestExtensionHost, startSession, Session } from '@autorest/extension-base';
-import { AnySchema, ObjectSchema, ArraySchema, ByteArraySchema, ChoiceValue, codeModelSchema, CodeModel, DateTimeSchema, GroupProperty, HttpHeader, HttpResponse, ImplementationLocation, Language, OperationGroup, SchemaType, NumberSchema, Operation, Parameter, Property, Protocols, Response, Schema, DictionarySchema, Protocol, ChoiceSchema, SealedChoiceSchema, ConstantSchema, Request, BooleanSchema, BinarySchema } from '@autorest/codemodel';
+import { AnySchema, ObjectSchema, ArraySchema, ByteArraySchema, ChoiceValue, codeModelSchema, CodeModel, DateTimeSchema, GroupProperty, HttpHeader, HttpResponse, ImplementationLocation, Language, OperationGroup, SchemaType, NumberSchema, Operation, Parameter, Property, Protocols, Response, Schema, DictionarySchema, Protocol, ChoiceSchema, SealedChoiceSchema, ConstantSchema, Request, BooleanSchema, BinarySchema, StringSchema } from '@autorest/codemodel';
 import { clone, items, values } from '@azure-tools/linq';
-import { aggregateParameters, getSchemaResponse, hasAdditionalProperties, isBinaryResponseOperation, isMultiRespOperation, isTypePassedByValue, isPageableOperation, isObjectSchema, isSchemaResponse, PagerInfo, PollerInfo, isLROOperation } from '../common/helpers';
+import { aggregateParameters, formatConstantValue, getSchemaResponse, hasAdditionalProperties, isBinaryResponseOperation, isMultiRespOperation, isTypePassedByValue, isObjectSchema, isSchemaResponse, isLROOperation, isOutputOnly } from '../common/helpers';
 import { namer, protocolMethods } from './namer';
 import { fromString } from 'html-to-text';
 import { Converter } from 'showdown';
@@ -86,8 +86,17 @@ async function process(session: Session<CodeModel>) {
       const descriptionMods = new Array<string>();
       if (prop.readOnly) {
         descriptionMods.push('READ-ONLY');
-      } else if (prop.required) {
+      } else if (prop.required && (prop.schema.type !== SchemaType.Constant || isOutputOnly(obj))) {
         descriptionMods.push('REQUIRED');
+      } else if (prop.required && prop.schema.type === SchemaType.Constant) {
+        descriptionMods.push('CONSTANT');
+      }
+      if (prop.required && prop.schema.type === SchemaType.Constant && !isOutputOnly(obj)) {
+        // add a comment with the const value for const properties that are sent over the wire
+        if (prop.language.go!.description) {
+          prop.language.go!.description += '<br/>';
+        }
+        prop.language.go!.description += `Field has constant value ${formatConstantValue(<ConstantSchema>prop.schema)}, any specified value is ignored.`;
       }
       if (prop.language.go!.description) {
         descriptionMods.push(parseComments(prop.language.go!.description));
@@ -338,6 +347,21 @@ function processOperationRequests(session: Session<CodeModel>) {
           head.schema.language.go!.name = schemaTypeToGoType(session.model, head.schema, false);
         }
       }
+      const opName = isLROOperation(op) ? 'Begin' + op.language.go!.name : op.language.go!.name;
+      // create an optional params struct even if the operation contains no optional params.
+      // this provides version resiliency in case optional params are added in the future.
+      // don't do this for paging next link operation as this isn't part of the public API
+      if (!op.language.go!.paging || !op.language.go!.paging.isNextOp) {
+        // create a type named <OperationGroup><Operation>Options
+        const optionalParamsGroupName = `${group.language.go!.clientName}${opName}Options`;
+        const desc = `${optionalParamsGroupName} contains the optional parameters for the ${group.language.go!.clientName}.${opName} method.`;
+        const gp = createGroupProperty(optionalParamsGroupName, desc);
+        gp.language.go!.name = 'options';
+        gp.required = false;
+        paramGroups.set(optionalParamsGroupName, gp);
+        // associate the param group with the operation
+        op.language.go!.optionalParamGroup = gp;
+      }
       for (const param of values(aggregateParameters(op))) {
         if (param.language.go!.description) {
           param.language.go!.description = parseComments(param.language.go!.description);
@@ -406,10 +430,6 @@ function processOperationRequests(session: Session<CodeModel>) {
           // at least one method contains a parameterized host param, bye-bye simple case
           group.language.go!.complexHostParams = true;
         }
-        let opName = op.language.go!.name;
-        if (isLROOperation(op)) {
-          opName = 'Begin' + opName;
-        }
         // check for grouping
         if (param.extensions?.['x-ms-parameter-grouping'] && <boolean>session.model.language.go!.groupParameters) {
           // this param belongs to a param group, init name with default
@@ -440,30 +460,18 @@ function processOperationRequests(session: Session<CodeModel>) {
           } else if (dupe.schema !== param.schema) {
             throw new Error(`parameter group ${paramGroupName} contains overlapping parameters with different schemas`);
           }
-          continue;
-        }
-        // create an optional params struct even if the operation contains no optional params.
-        // this provides version resiliency in case optional params are added in the future.
-        // don't do this for paging next link operation as this isn't part of the public API
-        if (op.language.go!.paging && op.language.go!.paging.isNextOp) {
-          continue;
-        }
-        // create a type named <OperationGroup><Operation>Options
-        const paramGroupName = `${group.language.go!.clientName}${opName}Options`;
-        if (!paramGroups.has(paramGroupName)) {
-          const desc = `${paramGroupName} contains the optional parameters for the ${group.language.go!.clientName}.${opName} method.`;
-          const gp = createGroupProperty(paramGroupName, desc);
-          gp.required = false;
-          paramGroups.set(paramGroupName, gp);
-          // associate the param group with the operation
-          op.language.go!.optionalParamGroup = gp;
-        }
-        // include non-required constants that aren't body params in the optional values struct
-        if (param.required !== true && !(param.schema.type === SchemaType.Constant && param.protocol.http!.in === 'body')) {
+        } else if (param.required !== true && !(param.schema.type === SchemaType.Constant && param.protocol.http!.in === 'body')) {
+          // include non-required constants that aren't body params in the optional values struct.
+          (<GroupProperty>op.language.go!.optionalParamGroup).originalParameter.push(param);
           // associate the group with the param
-          param.language.go!.paramGroup = paramGroups.get(paramGroupName);
-          paramGroups.get(paramGroupName)!.originalParameter.push(param);
+          param.language.go!.paramGroup = op.language.go!.optionalParamGroup;
         }
+      }
+      if (isLROOperation(op)) {
+        // add the ResumeToken to the optional params type
+        const tokenParam = newParameter('ResumeToken', 'Resumes the LRO from the provided token.', newString('string', ''));
+        tokenParam.language.go!.byValue = true;
+        (<GroupProperty>op.language.go!.optionalParamGroup).originalParameter.push(tokenParam);
       }
       // recursively add the marshalling format to the body param if applicable
       const marshallingFormat = getMarshallingFormat(op.requests![0].protocol);
@@ -566,29 +574,7 @@ function processOperationResponses(session: Session<CodeModel>) {
       } else if (op.responses?.length !== filtered.length) {
         op.responses = filtered;
       }
-      // create pageable type info before poller as the pager-poller depends on it
-      if (isPageableOperation(op)) {
-        if (session.model.language.go!.pageableTypes === undefined) {
-          session.model.language.go!.pageableTypes = new Array<PagerInfo>();
-        }
-        const name = `${group.language.go!.clientName}${op.language.go!.name}Pager`;
-        // create a new one, add to global list and assign to method
-        const pager = {
-          name: name,
-          op: op,
-        };
-        const pagers = <Array<PagerInfo>>session.model.language.go!.pageableTypes;
-        pagers.push(pager);
-        op.language.go!.pageableType = pager;
-      }
-      if (isLROOperation(op)) {
-        if (session.model.language.go!.pollerTypes === undefined) {
-          session.model.language.go!.pollerTypes = new Array<PollerInfo>();
-        }
-        createLROResponseEnvelope(session.model, group, op);
-      } else {
-        createResponseEnvelope(session.model, group, op);
-      }
+      createResponseEnvelope(session.model, group, op);
     }
   }
 }
@@ -626,14 +612,6 @@ interface HttpHeaderWithDescription extends HttpHeader {
 const scalarResponsePropName = 'Value';
 
 // creates the response envelope type to be returned from an operation and updates the operation.
-// for LROs, this is also called to create the final response envelope.
-//
-// type GetWidgetResponse struct { <== this is the response envelope, it groups the body with any headers
-//   Header1 *string <== modeled header response
-//   Header2 *int    <== modeled header response
-//   Widget          <== this is the result property, i.e. the schema result if the operation returns a model
-// }
-//
 function createResponseEnvelope(codeModel: CodeModel, group: OperationGroup, op: Operation) {
   // create the `type <type>Response struct` response
 
@@ -663,12 +641,15 @@ function createResponseEnvelope(codeModel: CodeModel, group: OperationGroup, op:
   // contains all the response envelopes
   const responseEnvelopes = <Array<ObjectSchema>>codeModel.language.go!.responseEnvelopes;
   // first create the response envelope, each operation gets one
-  const respEnvName = ensureUniqueModelName(codeModel, `${group.language.go!.clientName}${op.language.go!.name}Response`, 'Envelope');
+  const respEnvName = ensureUniqueModelName(codeModel, `${capitalize(group.language.go!.clientName)}${op.language.go!.name}Response`, 'Envelope');
   const respEnv = newObject(respEnvName, `${respEnvName} contains the response from method ${group.language.go!.clientName}.${op.language.go!.name}.`);
   respEnv.language.go!.responseType = true;
   respEnv.properties = new Array<Property>();
   responseEnvelopes.push(respEnv);
   op.language.go!.responseEnv = respEnv;
+  if (isLROOperation(op)) {
+    respEnv.language.go!.forLRO = true;
+  }
 
   // add any headers to the response
   for (const item of items(headers)) {
@@ -698,7 +679,7 @@ function createResponseEnvelope(codeModel: CodeModel, group: OperationGroup, op:
         resultTypes.push(response.schema.language.go!.name);
       }
     }
-    const resultProp = newRespProperty('Value', `// Possible types are ${resultTypes.join(', ')}\n`, newAny('multi-response value'), true);
+    const resultProp = newRespProperty('Value', `Possible types are ${resultTypes.join(', ')}\n`, newAny('multi-response value'), true);
     respEnv.properties.push(resultProp);
     respEnv.language.go!.resultProp = resultProp;
     return;
@@ -780,6 +761,13 @@ function newBinary(desc: string): BinarySchema {
   return binary;
 }
 
+function newString(name: string, desc: string): StringSchema {
+  const string = new StringSchema(name, desc);
+  string.language.go = string.language.default;
+  string.language.go!.name = 'string';
+  return string;
+}
+
 function newProperty(name: string, desc: string, schema: Schema): Property {
   let prop = new Property(name, desc, schema);
   if (isObjectSchema(schema) && schema.discriminator) {
@@ -787,6 +775,12 @@ function newProperty(name: string, desc: string, schema: Schema): Property {
   }
   prop.language.go = prop.language.default;
   return prop;
+}
+
+function newParameter(name: string, desc: string, schema: Schema): Parameter {
+  const param = new Parameter(name, desc, schema);
+  param.language.go! = param.language.default;
+  return param;
 }
 
 function newRespProperty(name: string, desc: string, schema: Schema, byValue: boolean): Property {
@@ -862,57 +856,6 @@ function recursiveTypeName(schema: Schema): string {
     default:
       throw new Error(`unhandled response schema type ${schema.type}`);
   }
-}
-
-// creates the LRO response envelope for the specified operation/response
-function createLROResponseEnvelope(codeModel: CodeModel, group: OperationGroup, op: Operation) {
-  if (op.language.go!.paging && op.language.go!.paging.member) {
-    // implementing support for this is very complicated, and since
-    // no services at present use this pattern avoid it for now
-    throw new Error(`${op.language.go!.name}: unsupported pager-poller that uses next page operation`);
-  }
-  // LROs have two response envelopes.
-  // the outer is the response envelope returned by the Begin* and Resume* methods, it depends on the poller.
-  // the inner is the response envelope returned by the PollUntilDone and FinalResponse methods, the poller depends on it.
-  // so we create them in the following order: inner, poller, outer
-
-  // contains all the response envelopes
-  const responseEnvelopes = <Array<ObjectSchema>>codeModel.language.go!.responseEnvelopes;
-  // create the "inner" response envelope
-  createResponseEnvelope(codeModel, group, op);
-  // now create the poller
-  if (op.language.go!.paging && op.language.go!.paging.member) {
-    // implementing support for this is very complicated, and since
-    // no services at present use this pattern avoid it for now
-    throw new Error(`${op.language.go!.name}: unsupported pager-poller that uses next page operation`);
-  }
-  if (codeModel.language.go!.pollerTypes === undefined) {
-    codeModel.language.go!.pollerTypes = new Array<PollerInfo>();
-  }
-  const pollerName = `${group.language.go!.clientName}${op.language.go!.name}Poller`;
-  const pollers = <Array<PollerInfo>>codeModel.language.go!.pollerTypes;
-  const poller = {
-    name: pollerName,
-    op: op,
-  };
-  pollers.push(poller);
-  op.language.go!.pollerType = poller;
-
-  // finally create the outer response envelope
-  const outerRespEnvName = `${group.language.go!.clientName}${op.language.go!.name}PollerResponse`;
-  const outerRespEnv = newObject(outerRespEnvName, `${outerRespEnvName} contains the response from method ${group.language.go!.clientName}.${op.language.go!.name}.`);
-  outerRespEnv.language.go!.responseType = true;
-  outerRespEnv.language.go!.isLRO = true;
-  outerRespEnv.language.go!.pollerInfo = poller;
-  outerRespEnv.properties = new Array<Property>();
-  // create Poller
-  const pollerType = newObject(pollerName, 'poller');
-  const pollerProp = newProperty('Poller', 'Poller contains an initialized poller.', pollerType);
-  outerRespEnv.properties.push(pollerProp);
-  responseEnvelopes.push(outerRespEnv);
-  // move the inner response envelope created earlier
-  op.language.go!.finalResponseEnv = op.language.go!.responseEnv;
-  op.language.go!.responseEnv = outerRespEnv;
 }
 
 function getRootDiscriminator(obj: ObjectSchema): ObjectSchema {

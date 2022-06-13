@@ -9,7 +9,7 @@ pr:
     - track2
 
 variables:
-  NodeVersion: '14.x'
+  NodeVersion: '16.x'
   goTestPath: '$(system.defaultWorkingDirectory)/test'
   GOBIN: '$(system.defaultWorkingDirectory)/bin/go'
 
@@ -19,12 +19,9 @@ jobs:
 
     strategy:
       matrix:
-        Linux_Go116:
+        Linux_Go118:
           vm.image: 'ubuntu-18.04'
-          go.version: '1.16.7'
-        Linux_Go117:
-          vm.image: 'ubuntu-18.04'
-          go.version: '1.17'
+          go.version: '1.18'
 
     pool:
       vmImage: '$(vm.image)'
@@ -34,6 +31,11 @@ jobs:
         displayName: 'Install Node $(NodeVersion)'
         inputs:
           versionSpec: '$(NodeVersion)'
+
+      - task: GoTool@0
+        inputs:
+          version: '$(go.version)'
+        displayName: "Select Go Version"
 
       - script: |
           cd $(Build.SourcesDirectory)
@@ -48,20 +50,16 @@ jobs:
 
       - script: |
           rush regenerate
+          rush modtidy 2>&1
           git add -A ./test/.
           git diff --staged -w 1>&2
         displayName: 'Regenerate Autorest Tests'
         failOnStderr: true
 
-      - task: GoTool@0
-        inputs:
-          version: '$(go.version)'
-        displayName: "Select Go Version"
-
       - script: |
           set -e
           go version
-          go get github.com/jstemmer/go-junit-report
+          go install github.com/jstemmer/go-junit-report@v1.0.0
         displayName: 'Install Dependencies'
         workingDirectory: '$(goTestPath)'
 
@@ -120,8 +118,8 @@ jobs:
             go test -run "^Test" -v | $(GOBIN)/go-junit-report -set-exit-code > report.xml
             popd
           }
-          pushd test
-          go run ./autorest/covreport/main.go
+          pushd ./test/autorest
+          go run ./covreport/main.go
           popd
           pushd ./src/node_modules/@microsoft.azure/autorest.testserver
           npm stop

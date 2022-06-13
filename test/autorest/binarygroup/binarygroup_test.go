@@ -6,36 +6,32 @@ package binarygroup
 import (
 	"bytes"
 	"context"
-	"reflect"
+	"generatortests"
 	"strings"
 	"testing"
 
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore/runtime"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/streaming"
+	"github.com/stretchr/testify/require"
 )
 
 func newBinaryGroupClient() *UploadClient {
-	return NewUploadClient(nil)
+	pl := runtime.NewPipeline(generatortests.ModuleName, generatortests.ModuleVersion, runtime.PipelineOptions{}, &azcore.ClientOptions{})
+	return NewUploadClient(pl)
 }
 
 func TestBinary(t *testing.T) {
 	client := newBinaryGroupClient()
 	resp, err := client.Binary(context.Background(), streaming.NopCloser(bytes.NewReader([]byte{0xff, 0xfe, 0xfd})), nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if !reflect.ValueOf(resp).IsZero() {
-		t.Fatal("expected zero-value result")
-	}
+	require.NoError(t, err)
+	require.Zero(t, resp)
 }
 
 func TestFile(t *testing.T) {
 	client := newBinaryGroupClient()
 	jsonFile := strings.NewReader(`{ "more": "cowbell" }`)
 	resp, err := client.File(context.Background(), streaming.NopCloser(jsonFile), nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if !reflect.ValueOf(resp).IsZero() {
-		t.Fatal("expected zero-value result")
-	}
+	require.NoError(t, err)
+	require.Zero(t, resp)
 }

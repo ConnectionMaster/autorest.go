@@ -5,54 +5,43 @@ package httpinfrastructuregroup
 
 import (
 	"context"
-	"reflect"
+	"generatortests"
 	"testing"
+
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore/runtime"
+	"github.com/stretchr/testify/require"
 )
 
 func newHTTPServerFailureClient() *HTTPServerFailureClient {
-	return NewHTTPServerFailureClient(nil)
+	pl := runtime.NewPipeline(generatortests.ModuleName, generatortests.ModuleVersion, runtime.PipelineOptions{}, &azcore.ClientOptions{})
+	return NewHTTPServerFailureClient(pl)
 }
 
 func TestHTTPServerFailureDelete505(t *testing.T) {
 	client := newHTTPServerFailureClient()
 	result, err := client.Delete505(context.Background(), nil)
-	if err == nil {
-		t.Fatalf("Expected an error but did not receive one")
-	}
-	if !reflect.ValueOf(result).IsZero() {
-		t.Fatalf("Expected a nil result")
-	}
+	require.Error(t, err)
+	require.Zero(t, result)
 }
 
 func TestHTTPServerFailureGet501(t *testing.T) {
 	client := newHTTPServerFailureClient()
 	result, err := client.Get501(context.Background(), nil)
-	if err == nil {
-		t.Fatalf("Expected an error but did not receive one")
-	}
-	if !reflect.ValueOf(result).IsZero() {
-		t.Fatalf("Expected a nil result")
-	}
+	require.Error(t, err)
+	require.Zero(t, result)
 }
 
 func TestHTTPServerFailureHead501(t *testing.T) {
 	client := newHTTPServerFailureClient()
 	result, err := client.Head501(context.Background(), nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if result.Success {
-		t.Fatal("unexpected success")
-	}
+	require.Error(t, err)
+	require.False(t, result.Success)
 }
 
 func TestHTTPServerFailurePost505(t *testing.T) {
 	client := newHTTPServerFailureClient()
 	result, err := client.Post505(context.Background(), nil)
-	if err == nil {
-		t.Fatalf("Expected an error but did not receive one")
-	}
-	if !reflect.ValueOf(result).IsZero() {
-		t.Fatalf("Expected a nil result")
-	}
+	require.Error(t, err)
+	require.Zero(t, result)
 }

@@ -6,7 +6,7 @@
 import { Session } from '@autorest/extension-base';
 import { values } from '@azure-tools/linq';
 import { capitalize, comment, uncapitalize } from '@azure-tools/codegen';
-import { aggregateParameters, isLROOperation, isPageableOperation, isSchemaResponse, isMultiRespOperation, PollerInfo } from '../common/helpers';
+import { aggregateParameters, isSchemaResponse, isMultiRespOperation } from '../common/helpers';
 import { ArraySchema, CodeModel, DictionarySchema, Language, Parameter, Schema, SchemaType, ObjectSchema, Operation, Property, GroupProperty, ImplementationLocation, SerializationStyle, ByteArraySchema, ConstantSchema, NumberSchema, DateTimeSchema } from '@autorest/codemodel';
 import { ImportManager } from './imports';
 
@@ -17,8 +17,8 @@ export const datetimeRFC1123Format = 'time.RFC1123';
 // returns the common source-file preamble (license comment, package name etc)
 export async function contentPreamble(session: Session<CodeModel>): Promise<string> {
   const headerText = comment(await session.getValue('header-text', 'MISSING LICENSE HEADER'), '// ');
-  let text = `//go:build go1.16\n`;
-  text += `// +build go1.16\n\n${headerText}\n\n`;
+  let text = `//go:build go1.18\n`;
+  text += `// +build go1.18\n\n${headerText}\n// DO NOT EDIT.\n\n`;
   text += `package ${session.model.language.go!.packageName}\n\n`;
   return text;
 }
@@ -158,14 +158,9 @@ export function getMethodParameters(op: Operation): Parameter[] {
     }
     params.push(param);
   }
-  // this handles the case where the operation has no optional params
-  // but has the optional params placeholder type.
-  if (paramGroups.length === 0 && op.language.go!.optionalParamGroup) {
-    paramGroups.push(op.language.go!.optionalParamGroup);
-  }
   // move global optional params to the end of the slice
   params.sort(sortParametersByRequired);
-  // add any parameter groups.  optional group goes last
+  // add any parameter groups.  optional groups go last
   paramGroups.sort((a: GroupProperty, b: GroupProperty) => {
     if (a.required === b.required) {
       return 0;
@@ -175,12 +170,13 @@ export function getMethodParameters(op: Operation): Parameter[] {
     }
     return 1;
   })
+  // add the optional param group last if it's not already in the list.
+  // all operations should have an optional params type.  the only exception
+  // is the next link operation for pageable operations.
+  if (op.language.go!.optionalParamGroup && !values(paramGroups).any(gp => { return gp.language.go!.name === op.language.go!.optionalParamGroup.language.go!.name})) {
+    paramGroups.push(op.language.go!.optionalParamGroup);
+  }
   for (const paramGroup of values(paramGroups)) {
-    // if there's only one optional param group, and there's no existing param
-    // named options, name the param "options" instead of its (long) type name
-    if (!paramGroup.required && paramGroups.length === 1 && !values(params).where(p => p.language.go!.name === 'options').any()) {
-      paramGroup.language.go!.name = 'options';
-    }
     params.push(paramGroup);
   }
   return params;
@@ -313,14 +309,6 @@ export function getResponseEnvelopeName(op: Operation): string {
   return op.language.go!.responseEnv.language.go!.name;
 }
 
-// returns the final response envelope type name for LROs
-export function getFinalResponseEnvelopeName(op: Operation): string {
-  if (!isLROOperation(op)) {
-    throw new Error(`getFinalResponseEnvelopeName() called for ${op.language.go!.name} which isn't an LRO`);
-  }
-  return op.language.go!.finalResponseEnv.language.go!.name;
-}
-
 // returns the result property for the operation or undefined if it doesn't return a model
 export function hasResultProperty(op: Operation): Property | undefined {
   const responseEnv = getResponseEnvelope(op);
@@ -331,12 +319,7 @@ export function hasResultProperty(op: Operation): Property | undefined {
 }
 
 export function getResponseEnvelope(op: Operation): ObjectSchema {
-  let responseEnv = op.language.go!.responseEnv;
-  if (isLROOperation(op)) {
-    // we need to consult the final response envelope for LROs
-    responseEnv = op.language.go!.finalResponseEnv;
-  }
-  return responseEnv;
+  return op.language.go!.responseEnv;
 }
 
 // returns the name of the response field within the response envelope
@@ -345,10 +328,6 @@ export function getResultFieldName(op: Operation): string {
     return 'Value';
   }
   let responseEnv = op.language.go!.responseEnv;
-  if (isLROOperation(op)) {
-    // we need to consult the final response envelope for LROs
-    responseEnv = op.language.go!.finalResponseEnv;
-  }
   if (responseEnv.language.go!.resultProp.schema.serialization?.xml?.name) {
     // here we use the schema name instead of the result field name as it's anonymously embedded in the response envelope.
     // this is to handle XML cases that specify a custom XML name for the propery within the result field.
@@ -381,17 +360,6 @@ export function formatStatusCodes(statusCodes: Array<string>): string {
     asHTTPStatus.push(formatStatusCode(rawCode));
   }
   return asHTTPStatus.join(', ');
-}
-
-// emits a poller declaration
-export function emitPoller(op: Operation): string {
-  let text = `&${(<PollerInfo>op.language.go!.pollerType).name} {\n`;
-  text += '\t\tpt: pt,\n';
-  if (isPageableOperation(op)) {
-    text += '\t\tclient: client,\n';
-  }
-  text += '\t}\n';
-  return text;
 }
 
 export function formatStatusCode(statusCode: string): string {

@@ -5,15 +5,18 @@ package azurespecialsgroup
 
 import (
 	"context"
+	"generatortests"
 	"net/http"
-	"reflect"
 	"testing"
 
-	"github.com/Azure/azure-sdk-for-go/sdk/azcore/policy"
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore/runtime"
+	"github.com/stretchr/testify/require"
 )
 
 func newSubscriptionInMethodClient() *SubscriptionInMethodClient {
-	return NewSubscriptionInMethodClient(nil)
+	pl := runtime.NewPipeline(generatortests.ModuleName, generatortests.ModuleVersion, runtime.PipelineOptions{}, &azcore.ClientOptions{})
+	return NewSubscriptionInMethodClient(pl)
 }
 
 // PostMethodLocalNull - POST method with subscriptionId modeled in the method.  pass in subscription id = null, client-side validation should prevent you from making this call
@@ -24,41 +27,29 @@ func TestPostMethodLocalNull(t *testing.T) {
 // PostMethodLocalValid - POST method with subscriptionId modeled in the method.  pass in subscription id = '1234-5678-9012-3456' to succeed
 func TestPostMethodLocalValid(t *testing.T) {
 	client := newSubscriptionInMethodClient()
-	result, err := client.PostMethodLocalValid(policy.WithHTTPHeader(context.Background(), http.Header{
+	result, err := client.PostMethodLocalValid(runtime.WithHTTPHeader(context.Background(), http.Header{
 		"x-ms-client-request-id": []string{"9C4D50EE-2D56-4CD3-8152-34347DC9F2B0"},
 	}), "1234-5678-9012-3456", nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if !reflect.ValueOf(result).IsZero() {
-		t.Fatal("expected zero-value result")
-	}
+	require.NoError(t, err)
+	require.Zero(t, result)
 }
 
 // PostPathLocalValid - POST method with subscriptionId modeled in the method.  pass in subscription id = '1234-5678-9012-3456' to succeed
 func TestPostPathLocalValid(t *testing.T) {
 	client := newSubscriptionInMethodClient()
-	result, err := client.PostPathLocalValid(policy.WithHTTPHeader(context.Background(), http.Header{
+	result, err := client.PostPathLocalValid(runtime.WithHTTPHeader(context.Background(), http.Header{
 		"x-ms-client-request-id": []string{"9C4D50EE-2D56-4CD3-8152-34347DC9F2B0"},
 	}), "1234-5678-9012-3456", nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if !reflect.ValueOf(result).IsZero() {
-		t.Fatal("expected zero-value result")
-	}
+	require.NoError(t, err)
+	require.Zero(t, result)
 }
 
 // PostSwaggerLocalValid - POST method with subscriptionId modeled in the method.  pass in subscription id = '1234-5678-9012-3456' to succeed
 func TestPostSwaggerLocalValid(t *testing.T) {
 	client := newSubscriptionInMethodClient()
-	result, err := client.PostSwaggerLocalValid(policy.WithHTTPHeader(context.Background(), http.Header{
+	result, err := client.PostSwaggerLocalValid(runtime.WithHTTPHeader(context.Background(), http.Header{
 		"x-ms-client-request-id": []string{"9C4D50EE-2D56-4CD3-8152-34347DC9F2B0"},
 	}), "1234-5678-9012-3456", nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if !reflect.ValueOf(result).IsZero() {
-		t.Fatal("expected zero-value result")
-	}
+	require.NoError(t, err)
+	require.Zero(t, result)
 }

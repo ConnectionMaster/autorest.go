@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { serialize } from '@azure-tools/codegen';
-import { AutorestExtensionHost, startSession, Session } from '@autorest/extension-base';
+import { AutorestExtensionHost, startSession } from '@autorest/extension-base';
 import { codeModelSchema, CodeModel } from '@autorest/codemodel';
 import { values } from '@azure-tools/linq';
 import { generateOperations } from './operations';
@@ -12,21 +12,9 @@ import { generateModels } from './models';
 import { generateResponses } from './responses';
 import { generateConstants } from './constants';
 import { generateTimeHelpers } from './time';
-import { generatePagers } from './pagers';
-import { generatePollers } from './pollers';
 import { generatePolymorphicHelpers } from './polymorphics';
 import { generateGoModFile } from './gomod';
 import { generateXMLAdditionalPropsHelpers } from './xmlAdditionalProps';
-
-async function getModuleVersion(session: Session<CodeModel>): Promise<string> {
-  const version = await session.getValue('module-version', '');
-  if (version === '') {
-    throw new Error('--module-version is a required parameter');
-  } else if (!version.match(/^\d+\.\d+\.\d+$/) && !version.match(/^\d+\.\d+\.\d+-beta\.\d+$/)) {
-    throw new Error(`module version ${version} must in the format major.minor.patch[-beta.N]`);
-  }
-  return version;
-}
 
 // The generator emits Go source code files to disk.
 export async function protocolGen(host: AutorestExtensionHost) {
@@ -35,7 +23,6 @@ export async function protocolGen(host: AutorestExtensionHost) {
   try {
     // get the code model from the core
     const session = await startSession<CodeModel>(host, codeModelSchema);
-    const version = await getModuleVersion(session);
 
     const operations = await generateOperations(session);
     let filePrefix = await session.getValue('file-prefix', '');
@@ -67,7 +54,7 @@ export async function protocolGen(host: AutorestExtensionHost) {
       });
     }
 
-    const constants = await generateConstants(session, version);
+    const constants = await generateConstants(session);
     host.writeFile({
       filename: `${filePrefix}constants.go`,
       content: constants,
@@ -106,22 +93,6 @@ export async function protocolGen(host: AutorestExtensionHost) {
       });
     }
 
-    const pagers = await generatePagers(session);
-    if (pagers.length > 0) {
-      host.writeFile({
-        filename: `${filePrefix}pagers.go`,
-        content: pagers,
-        artifactType: 'source-file-go'
-      });
-    }
-    const pollers = await generatePollers(session);
-    if (pollers.length > 0) {
-      host.writeFile({
-        filename: `${filePrefix}pollers.go`,
-        content: pollers,
-        artifactType: 'source-file-go'
-      });
-    }
     const polymorphics = await generatePolymorphicHelpers(session);
     if (polymorphics.length > 0) {
       host.writeFile({
@@ -130,7 +101,10 @@ export async function protocolGen(host: AutorestExtensionHost) {
         artifactType: 'source-file-go'
       });
     }
-    const gomod = await generateGoModFile(session);
+
+    // don't overwrite an existing go.mod file, update it if required
+    const existingGoMod = await host.readFile('go.mod');
+    const gomod = await generateGoModFile(session, existingGoMod);
     if (gomod.length > 0) {
       host.writeFile({
         filename: 'go.mod',
@@ -138,6 +112,7 @@ export async function protocolGen(host: AutorestExtensionHost) {
         artifactType: 'source-file-go'
       });
     }
+
     const xmlAddlProps = await generateXMLAdditionalPropsHelpers(session);
     if (xmlAddlProps.length > 0) {
       host.writeFile({

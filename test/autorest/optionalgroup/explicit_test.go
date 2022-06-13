@@ -5,133 +5,94 @@ package optionalgroup
 
 import (
 	"context"
-	"reflect"
+	"generatortests"
 	"testing"
+
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore/runtime"
+	"github.com/stretchr/testify/require"
 )
 
 func newExplicitClient() *ExplicitClient {
-	return NewExplicitClient(nil)
+	pl := runtime.NewPipeline(generatortests.ModuleName, generatortests.ModuleVersion, runtime.PipelineOptions{}, &azcore.ClientOptions{})
+	return NewExplicitClient(pl)
 }
 
 func TestExplicitPostOptionalArrayHeader(t *testing.T) {
 	client := newExplicitClient()
 	result, err := client.PostOptionalArrayHeader(context.Background(), nil)
-	if err != nil {
-		t.Fatalf("PostOptionalArrayHeader: %v", err)
-	}
-	if !reflect.ValueOf(result).IsZero() {
-		t.Fatal("expected zero-value result")
-	}
+	require.NoError(t, err)
+	require.Zero(t, result)
 }
 
 func TestExplicitPostOptionalArrayParameter(t *testing.T) {
 	client := newExplicitClient()
 	result, err := client.PostOptionalArrayParameter(context.Background(), nil)
-	if err != nil {
-		t.Fatalf("PostOptionalArrayParameter: %v", err)
-	}
-	if !reflect.ValueOf(result).IsZero() {
-		t.Fatal("expected zero-value result")
-	}
+	require.NoError(t, err)
+	require.Zero(t, result)
 }
 
 func TestExplicitPostOptionalArrayProperty(t *testing.T) {
 	client := newExplicitClient()
 	result, err := client.PostOptionalArrayProperty(context.Background(), nil)
-	if err != nil {
-		t.Fatalf("PostOptionalArrayProperty: %v", err)
-	}
-	if !reflect.ValueOf(result).IsZero() {
-		t.Fatal("expected zero-value result")
-	}
+	require.NoError(t, err)
+	require.Zero(t, result)
 }
 
 func TestExplicitPostOptionalClassParameter(t *testing.T) {
 	client := newExplicitClient()
 	result, err := client.PostOptionalClassParameter(context.Background(), nil)
-	if err != nil {
-		t.Fatalf("PostOptionalClassParameter: %v", err)
-	}
-	if !reflect.ValueOf(result).IsZero() {
-		t.Fatal("expected zero-value result")
-	}
+	require.NoError(t, err)
+	require.Zero(t, result)
 }
 
 func TestExplicitPostOptionalClassProperty(t *testing.T) {
 	client := newExplicitClient()
 	result, err := client.PostOptionalClassProperty(context.Background(), nil)
-	if err != nil {
-		t.Fatalf("PostOptionalClassProperty: %v", err)
-	}
-	if !reflect.ValueOf(result).IsZero() {
-		t.Fatal("expected zero-value result")
-	}
+	require.NoError(t, err)
+	require.Zero(t, result)
 }
 
 func TestExplicitPostOptionalIntegerHeader(t *testing.T) {
 	client := newExplicitClient()
 	result, err := client.PostOptionalIntegerHeader(context.Background(), nil)
-	if err != nil {
-		t.Fatalf("PostOptionalIntegerHeader: %v", err)
-	}
-	if !reflect.ValueOf(result).IsZero() {
-		t.Fatal("expected zero-value result")
-	}
+	require.NoError(t, err)
+	require.Zero(t, result)
 }
 
 func TestExplicitPostOptionalIntegerParameter(t *testing.T) {
 	client := newExplicitClient()
 	result, err := client.PostOptionalIntegerParameter(context.Background(), nil)
-	if err != nil {
-		t.Fatalf("PostOptionalIntegerParameter: %v", err)
-	}
-	if !reflect.ValueOf(result).IsZero() {
-		t.Fatal("expected zero-value result")
-	}
+	require.NoError(t, err)
+	require.Zero(t, result)
 }
 
 func TestExplicitPostOptionalIntegerProperty(t *testing.T) {
 	client := newExplicitClient()
 	result, err := client.PostOptionalIntegerProperty(context.Background(), nil)
-	if err != nil {
-		t.Fatalf("PostOptionalIntegerProperty: %v", err)
-	}
-	if !reflect.ValueOf(result).IsZero() {
-		t.Fatal("expected zero-value result")
-	}
+	require.NoError(t, err)
+	require.Zero(t, result)
 }
 
 func TestExplicitPostOptionalStringHeader(t *testing.T) {
 	client := newExplicitClient()
 	result, err := client.PostOptionalStringHeader(context.Background(), nil)
-	if err != nil {
-		t.Fatalf("PostOptionalStringHeader: %v", err)
-	}
-	if !reflect.ValueOf(result).IsZero() {
-		t.Fatal("expected zero-value result")
-	}
+	require.NoError(t, err)
+	require.Zero(t, result)
 }
 
 func TestExplicitPostOptionalStringParameter(t *testing.T) {
 	client := newExplicitClient()
 	result, err := client.PostOptionalStringParameter(context.Background(), nil)
-	if err != nil {
-		t.Fatalf("PostOptionalStringParameter: %v", err)
-	}
-	if !reflect.ValueOf(result).IsZero() {
-		t.Fatal("expected zero-value result")
-	}
+	require.NoError(t, err)
+	require.Zero(t, result)
 }
 
 func TestExplicitPostOptionalStringProperty(t *testing.T) {
 	client := newExplicitClient()
 	result, err := client.PostOptionalStringProperty(context.Background(), nil)
-	if err != nil {
-		t.Fatalf("PostOptionalStringProperty: %v", err)
-	}
-	if !reflect.ValueOf(result).IsZero() {
-		t.Fatal("expected zero-value result")
-	}
+	require.NoError(t, err)
+	require.Zero(t, result)
 }
 
 // TODO the goal of this test is to throw an exception but nils are acceptable for  []strings in go
@@ -139,12 +100,8 @@ func TestExplicitPostRequiredArrayHeader(t *testing.T) {
 	t.Skip("are not validating parameters in track2")
 	client := newExplicitClient()
 	result, err := client.PostRequiredArrayHeader(context.Background(), nil, nil)
-	if err == nil {
-		t.Fatalf("Expected an error but did not receive one")
-	}
-	if !reflect.ValueOf(result).IsZero() {
-		t.Fatalf("Expected a nil result but received informaiton in result")
-	}
+	require.Error(t, err)
+	require.Zero(t, result)
 }
 
 // TODO the goal of this test is to throw an exception but nils are acceptable for  []strings in go
@@ -152,24 +109,16 @@ func TestExplicitPostRequiredArrayParameter(t *testing.T) {
 	t.Skip("are not validating parameters in track2")
 	client := newExplicitClient()
 	result, err := client.PostRequiredArrayParameter(context.Background(), nil, nil)
-	if err == nil {
-		t.Fatalf("Expected an error but did not receive one")
-	}
-	if !reflect.ValueOf(result).IsZero() {
-		t.Fatalf("Expected a nil result but received informaiton in result")
-	}
+	require.Error(t, err)
+	require.Zero(t, result)
 }
 
 func TestExplicitPostRequiredArrayProperty(t *testing.T) {
 	t.Skip("are not validating parameters in track2")
 	client := newExplicitClient()
 	result, err := client.PostRequiredArrayProperty(context.Background(), ArrayWrapper{Value: nil}, nil)
-	if err == nil {
-		t.Fatalf("Expected an error but did not receive one")
-	}
-	if !reflect.ValueOf(result).IsZero() {
-		t.Fatalf("Expected a nil result but received informaiton in result")
-	}
+	require.Error(t, err)
+	require.Zero(t, result)
 }
 
 // TODO check this test
@@ -177,24 +126,16 @@ func TestExplicitPostRequiredClassParameter(t *testing.T) {
 	t.Skip("are not validating parameters in track2")
 	client := newExplicitClient()
 	result, err := client.PostRequiredClassParameter(context.Background(), Product{}, nil)
-	if err == nil {
-		t.Fatalf("Expected an error but did not receive one")
-	}
-	if !reflect.ValueOf(result).IsZero() {
-		t.Fatalf("Expected a nil result but received informaiton in result")
-	}
+	require.Error(t, err)
+	require.Zero(t, result)
 }
 
 func TestExplicitPostRequiredClassProperty(t *testing.T) {
 	t.Skip("are not validating parameters in track2")
 	client := newExplicitClient()
 	result, err := client.PostRequiredClassProperty(context.Background(), ClassWrapper{}, nil)
-	if err == nil {
-		t.Fatalf("Expected an error but did not receive one")
-	}
-	if !reflect.ValueOf(result).IsZero() {
-		t.Fatalf("Expected a nil result but received informaiton in result")
-	}
+	require.Error(t, err)
+	require.Zero(t, result)
 }
 
 // TODO check this test is does pass if we query the endpoint but that is not the expected behavior
@@ -202,12 +143,8 @@ func TestExplicitPostRequiredIntegerHeader(t *testing.T) {
 	t.Skip("cannot set nil for int32 in Go")
 	client := newExplicitClient()
 	result, err := client.PostRequiredIntegerHeader(context.Background(), 0, nil)
-	if err == nil {
-		t.Fatalf("Expected an error but did not receive one")
-	}
-	if !reflect.ValueOf(result).IsZero() {
-		t.Fatalf("Expected a nil result but received informaiton in result")
-	}
+	require.Error(t, err)
+	require.Zero(t, result)
 }
 
 // TODO check this test is does pass if we query the endpoint but that is not the expected behavior
@@ -215,12 +152,8 @@ func TestExplicitPostRequiredIntegerParameter(t *testing.T) {
 	t.Skip("cannot set nil for int32 in Go")
 	client := newExplicitClient()
 	result, err := client.PostRequiredIntegerParameter(context.Background(), 0, nil)
-	if err == nil {
-		t.Fatalf("Expected an error but did not receive one")
-	}
-	if !reflect.ValueOf(result).IsZero() {
-		t.Fatalf("Expected a nil result but received informaiton in result")
-	}
+	require.Error(t, err)
+	require.Zero(t, result)
 }
 
 // TODO check this test is does pass if we query the endpoint but that is not the expected behavior
@@ -228,12 +161,8 @@ func TestExplicitPostRequiredIntegerProperty(t *testing.T) {
 	t.Skip("are not validating parameters in track2")
 	client := newExplicitClient()
 	result, err := client.PostRequiredIntegerProperty(context.Background(), IntWrapper{}, nil)
-	if err == nil {
-		t.Fatalf("Expected an error but did not receive one")
-	}
-	if !reflect.ValueOf(result).IsZero() {
-		t.Fatalf("Expected a nil result but received informaiton in result")
-	}
+	require.Error(t, err)
+	require.Zero(t, result)
 }
 
 // TODO check this test is does pass if we query the endpoint but that is not the expected behavior
@@ -241,12 +170,8 @@ func TestExplicitPostRequiredStringHeader(t *testing.T) {
 	t.Skip("cannot set nil for string in Go")
 	client := newExplicitClient()
 	result, err := client.PostRequiredStringHeader(context.Background(), "", nil)
-	if err == nil {
-		t.Fatalf("Expected an error but did not receive one")
-	}
-	if !reflect.ValueOf(result).IsZero() {
-		t.Fatalf("Expected a nil result but received informaiton in result")
-	}
+	require.Error(t, err)
+	require.Zero(t, result)
 }
 
 // TODO check this test is does pass if we query the endpoint but that is not the expected behavior
@@ -254,12 +179,8 @@ func TestExplicitPostRequiredStringParameter(t *testing.T) {
 	t.Skip("cannot set nil for string in Go")
 	client := newExplicitClient()
 	result, err := client.PostRequiredStringParameter(context.Background(), "", nil)
-	if err == nil {
-		t.Fatalf("Expected an error but did not receive one")
-	}
-	if !reflect.ValueOf(result).IsZero() {
-		t.Fatalf("Expected a nil result but received informaiton in result")
-	}
+	require.Error(t, err)
+	require.Zero(t, result)
 }
 
 // TODO check this test is does pass if we query the endpoint but that is not the expected behavior
@@ -267,10 +188,6 @@ func TestExplicitPostRequiredStringProperty(t *testing.T) {
 	t.Skip("are not validating parameters in track2")
 	client := newExplicitClient()
 	result, err := client.PostRequiredStringProperty(context.Background(), StringWrapper{}, nil)
-	if err == nil {
-		t.Fatalf("Expected an error but did not receive one")
-	}
-	if !reflect.ValueOf(result).IsZero() {
-		t.Fatalf("Expected a nil result but received informaiton in result")
-	}
+	require.Error(t, err)
+	require.Zero(t, result)
 }

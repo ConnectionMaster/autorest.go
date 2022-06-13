@@ -5,28 +5,31 @@ package migroup
 
 import (
 	"context"
+	"generatortests"
 	"testing"
 
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore/runtime"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	"github.com/google/go-cmp/cmp"
+	"github.com/stretchr/testify/require"
 )
 
 func newMultipleInheritanceServiceClient() *MultipleInheritanceServiceClient {
-	return NewMultipleInheritanceServiceClient(nil)
+	pl := runtime.NewPipeline(generatortests.ModuleName, generatortests.ModuleVersion, runtime.PipelineOptions{}, &azcore.ClientOptions{})
+	return NewMultipleInheritanceServiceClient(pl)
 }
 
 // GetCat - Get a cat with name 'Whiskers' where likesMilk, meows, and hisses is true
 func TestGetCat(t *testing.T) {
 	client := newMultipleInheritanceServiceClient()
 	result, err := client.GetCat(context.Background(), nil)
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 	if r := cmp.Diff(result.Cat, Cat{
-		Hisses:    to.BoolPtr(true),
-		Meows:     to.BoolPtr(true),
-		Name:      to.StringPtr("Whiskers"),
-		LikesMilk: to.BoolPtr(true),
+		Hisses:    to.Ptr(true),
+		Meows:     to.Ptr(true),
+		Name:      to.Ptr("Whiskers"),
+		LikesMilk: to.Ptr(true),
 	}); r != "" {
 		t.Fatal(r)
 	}
@@ -36,12 +39,10 @@ func TestGetCat(t *testing.T) {
 func TestGetFeline(t *testing.T) {
 	client := newMultipleInheritanceServiceClient()
 	result, err := client.GetFeline(context.Background(), nil)
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 	if r := cmp.Diff(result.Feline, Feline{
-		Hisses: to.BoolPtr(true),
-		Meows:  to.BoolPtr(true),
+		Hisses: to.Ptr(true),
+		Meows:  to.Ptr(true),
 	}); r != "" {
 		t.Fatal(r)
 	}
@@ -51,12 +52,10 @@ func TestGetFeline(t *testing.T) {
 func TestGetHorse(t *testing.T) {
 	client := newMultipleInheritanceServiceClient()
 	result, err := client.GetHorse(context.Background(), nil)
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 	if r := cmp.Diff(result.Horse, Horse{
-		Name:         to.StringPtr("Fred"),
-		IsAShowHorse: to.BoolPtr(true),
+		Name:         to.Ptr("Fred"),
+		IsAShowHorse: to.Ptr(true),
 	}); r != "" {
 		t.Fatal(r)
 	}
@@ -66,15 +65,13 @@ func TestGetHorse(t *testing.T) {
 func TestGetKitten(t *testing.T) {
 	client := newMultipleInheritanceServiceClient()
 	result, err := client.GetKitten(context.Background(), nil)
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 	if r := cmp.Diff(result.Kitten, Kitten{
-		Hisses:      to.BoolPtr(true),
-		Meows:       to.BoolPtr(true),
-		Name:        to.StringPtr("Gatito"),
-		LikesMilk:   to.BoolPtr(true),
-		EatsMiceYet: to.BoolPtr(false),
+		Hisses:      to.Ptr(true),
+		Meows:       to.Ptr(true),
+		Name:        to.Ptr("Gatito"),
+		LikesMilk:   to.Ptr(true),
+		EatsMiceYet: to.Ptr(false),
 	}); r != "" {
 		t.Fatal(r)
 	}
@@ -84,11 +81,9 @@ func TestGetKitten(t *testing.T) {
 func TestGetPet(t *testing.T) {
 	client := newMultipleInheritanceServiceClient()
 	result, err := client.GetPet(context.Background(), nil)
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 	if r := cmp.Diff(result.Pet, Pet{
-		Name: to.StringPtr("Peanut"),
+		Name: to.Ptr("Peanut"),
 	}); r != "" {
 		t.Fatal(r)
 	}
@@ -98,15 +93,13 @@ func TestGetPet(t *testing.T) {
 func TestPutCat(t *testing.T) {
 	client := newMultipleInheritanceServiceClient()
 	result, err := client.PutCat(context.Background(), Cat{
-		Hisses:    to.BoolPtr(false),
-		Meows:     to.BoolPtr(true),
-		Name:      to.StringPtr("Boots"),
-		LikesMilk: to.BoolPtr(false),
+		Hisses:    to.Ptr(false),
+		Meows:     to.Ptr(true),
+		Name:      to.Ptr("Boots"),
+		LikesMilk: to.Ptr(false),
 	}, nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if r := cmp.Diff(result.Value, to.StringPtr("Cat was correct!")); r != "" {
+	require.NoError(t, err)
+	if r := cmp.Diff(result.Value, to.Ptr("Cat was correct!")); r != "" {
 		t.Fatal(r)
 	}
 }
@@ -115,13 +108,11 @@ func TestPutCat(t *testing.T) {
 func TestPutFeline(t *testing.T) {
 	client := newMultipleInheritanceServiceClient()
 	result, err := client.PutFeline(context.Background(), Feline{
-		Hisses: to.BoolPtr(true),
-		Meows:  to.BoolPtr(false),
+		Hisses: to.Ptr(true),
+		Meows:  to.Ptr(false),
 	}, nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if r := cmp.Diff(result.Value, to.StringPtr("Feline was correct!")); r != "" {
+	require.NoError(t, err)
+	if r := cmp.Diff(result.Value, to.Ptr("Feline was correct!")); r != "" {
 		t.Fatal(r)
 	}
 }
@@ -130,13 +121,11 @@ func TestPutFeline(t *testing.T) {
 func TestPutHorse(t *testing.T) {
 	client := newMultipleInheritanceServiceClient()
 	result, err := client.PutHorse(context.Background(), Horse{
-		Name:         to.StringPtr("General"),
-		IsAShowHorse: to.BoolPtr(false),
+		Name:         to.Ptr("General"),
+		IsAShowHorse: to.Ptr(false),
 	}, nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if r := cmp.Diff(result.Value, to.StringPtr("Horse was correct!")); r != "" {
+	require.NoError(t, err)
+	if r := cmp.Diff(result.Value, to.Ptr("Horse was correct!")); r != "" {
 		t.Fatal(r)
 	}
 }
@@ -145,16 +134,14 @@ func TestPutHorse(t *testing.T) {
 func TestPutKitten(t *testing.T) {
 	client := newMultipleInheritanceServiceClient()
 	result, err := client.PutKitten(context.Background(), Kitten{
-		Hisses:      to.BoolPtr(false),
-		Meows:       to.BoolPtr(true),
-		Name:        to.StringPtr("Kitty"),
-		LikesMilk:   to.BoolPtr(false),
-		EatsMiceYet: to.BoolPtr(true),
+		Hisses:      to.Ptr(false),
+		Meows:       to.Ptr(true),
+		Name:        to.Ptr("Kitty"),
+		LikesMilk:   to.Ptr(false),
+		EatsMiceYet: to.Ptr(true),
 	}, nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if r := cmp.Diff(result.Value, to.StringPtr("Kitten was correct!")); r != "" {
+	require.NoError(t, err)
+	if r := cmp.Diff(result.Value, to.Ptr("Kitten was correct!")); r != "" {
 		t.Fatal(r)
 	}
 }
@@ -163,12 +150,10 @@ func TestPutKitten(t *testing.T) {
 func TestPutPet(t *testing.T) {
 	client := newMultipleInheritanceServiceClient()
 	result, err := client.PutPet(context.Background(), Pet{
-		Name: to.StringPtr("Butter"),
+		Name: to.Ptr("Butter"),
 	}, nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if r := cmp.Diff(result.Value, to.StringPtr("Pet was correct!")); r != "" {
+	require.NoError(t, err)
+	if r := cmp.Diff(result.Value, to.Ptr("Pet was correct!")); r != "" {
 		t.Fatal(r)
 	}
 }

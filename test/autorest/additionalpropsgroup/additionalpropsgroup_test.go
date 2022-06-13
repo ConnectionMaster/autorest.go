@@ -6,39 +6,42 @@ package additionalpropsgroup
 import (
 	"context"
 	"encoding/base64"
+	"generatortests"
 	"testing"
 
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore/runtime"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	"github.com/google/go-cmp/cmp"
+	"github.com/stretchr/testify/require"
 )
 
 func newPetsClient() *PetsClient {
-	return NewPetsClient(nil)
+	pl := runtime.NewPipeline(generatortests.ModuleName, generatortests.ModuleVersion, runtime.PipelineOptions{}, &azcore.ClientOptions{})
+	return NewPetsClient(pl)
 }
 
 // CreateAPInProperties - Create a Pet which contains more properties than what is defined.
 func TestCreateAPInProperties(t *testing.T) {
 	client := newPetsClient()
 	result, err := client.CreateAPInProperties(context.Background(), PetAPInProperties{
-		ID:   to.Int32Ptr(4),
-		Name: to.StringPtr("Bunny"),
+		ID:   to.Ptr[int32](4),
+		Name: to.Ptr("Bunny"),
 		AdditionalProperties: map[string]*float32{
-			"height":   to.Float32Ptr(5.61),
-			"weight":   to.Float32Ptr(599),
-			"footsize": to.Float32Ptr(11.5),
+			"height":   to.Ptr[float32](5.61),
+			"weight":   to.Ptr[float32](599),
+			"footsize": to.Ptr[float32](11.5),
 		},
 	}, nil)
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 	if r := cmp.Diff(result.PetAPInProperties, PetAPInProperties{
-		ID:     to.Int32Ptr(4),
-		Name:   to.StringPtr("Bunny"),
-		Status: to.BoolPtr(true),
+		ID:     to.Ptr[int32](4),
+		Name:   to.Ptr("Bunny"),
+		Status: to.Ptr(true),
 		AdditionalProperties: map[string]*float32{
-			"height":   to.Float32Ptr(5.61),
-			"weight":   to.Float32Ptr(599),
-			"footsize": to.Float32Ptr(11.5),
+			"height":   to.Ptr[float32](5.61),
+			"weight":   to.Ptr[float32](599),
+			"footsize": to.Ptr[float32](11.5),
 		},
 	}); r != "" {
 		t.Fatal(r)
@@ -49,37 +52,35 @@ func TestCreateAPInProperties(t *testing.T) {
 func TestCreateAPInPropertiesWithAPString(t *testing.T) {
 	client := newPetsClient()
 	result, err := client.CreateAPInPropertiesWithAPString(context.Background(), PetAPInPropertiesWithAPString{
-		ID:            to.Int32Ptr(5),
-		Name:          to.StringPtr("Funny"),
-		ODataLocation: to.StringPtr("westus"),
+		ID:            to.Ptr[int32](5),
+		Name:          to.Ptr("Funny"),
+		ODataLocation: to.Ptr("westus"),
 		AdditionalProperties: map[string]*string{
-			"color": to.StringPtr("red"),
-			"city":  to.StringPtr("Seattle"),
-			"food":  to.StringPtr("tikka masala"),
+			"color": to.Ptr("red"),
+			"city":  to.Ptr("Seattle"),
+			"food":  to.Ptr("tikka masala"),
 		},
 		AdditionalProperties1: map[string]*float32{
-			"height":   to.Float32Ptr(5.61),
-			"weight":   to.Float32Ptr(599),
-			"footsize": to.Float32Ptr(11.5),
+			"height":   to.Ptr[float32](5.61),
+			"weight":   to.Ptr[float32](599),
+			"footsize": to.Ptr[float32](11.5),
 		},
 	}, nil)
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 	if r := cmp.Diff(result.PetAPInPropertiesWithAPString, PetAPInPropertiesWithAPString{
-		ID:            to.Int32Ptr(5),
-		Name:          to.StringPtr("Funny"),
-		ODataLocation: to.StringPtr("westus"),
-		Status:        to.BoolPtr(true),
+		ID:            to.Ptr[int32](5),
+		Name:          to.Ptr("Funny"),
+		ODataLocation: to.Ptr("westus"),
+		Status:        to.Ptr(true),
 		AdditionalProperties: map[string]*string{
-			"color": to.StringPtr("red"),
-			"city":  to.StringPtr("Seattle"),
-			"food":  to.StringPtr("tikka masala"),
+			"color": to.Ptr("red"),
+			"city":  to.Ptr("Seattle"),
+			"food":  to.Ptr("tikka masala"),
 		},
 		AdditionalProperties1: map[string]*float32{
-			"height":   to.Float32Ptr(5.61),
-			"weight":   to.Float32Ptr(599),
-			"footsize": to.Float32Ptr(11.5),
+			"height":   to.Ptr[float32](5.61),
+			"weight":   to.Ptr[float32](599),
+			"footsize": to.Ptr[float32](11.5),
 		},
 	}); r != "" {
 		t.Fatal(r)
@@ -90,8 +91,8 @@ func TestCreateAPInPropertiesWithAPString(t *testing.T) {
 func TestCreateAPObject(t *testing.T) {
 	client := newPetsClient()
 	result, err := client.CreateAPObject(context.Background(), PetAPObject{
-		ID:   to.Int32Ptr(2),
-		Name: to.StringPtr("Hira"),
+		ID:   to.Ptr[int32](2),
+		Name: to.Ptr("Hira"),
 		AdditionalProperties: map[string]interface{}{
 			"siblings": []interface{}{
 				map[string]interface{}{
@@ -106,13 +107,11 @@ func TestCreateAPObject(t *testing.T) {
 			"picture": base64.StdEncoding.EncodeToString([]byte{255, 255, 255, 255, 254}),
 		},
 	}, nil)
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 	if r := cmp.Diff(result.PetAPObject, PetAPObject{
-		ID:     to.Int32Ptr(2),
-		Name:   to.StringPtr("Hira"),
-		Status: to.BoolPtr(true),
+		ID:     to.Ptr[int32](2),
+		Name:   to.Ptr("Hira"),
+		Status: to.Ptr(true),
 		AdditionalProperties: map[string]interface{}{
 			"siblings": []interface{}{
 				map[string]interface{}{
@@ -135,25 +134,23 @@ func TestCreateAPObject(t *testing.T) {
 func TestCreateAPString(t *testing.T) {
 	client := newPetsClient()
 	result, err := client.CreateAPString(context.Background(), PetAPString{
-		ID:   to.Int32Ptr(3),
-		Name: to.StringPtr("Tommy"),
+		ID:   to.Ptr[int32](3),
+		Name: to.Ptr("Tommy"),
 		AdditionalProperties: map[string]*string{
-			"color":  to.StringPtr("red"),
-			"weight": to.StringPtr("10 kg"),
-			"city":   to.StringPtr("Bombay"),
+			"color":  to.Ptr("red"),
+			"weight": to.Ptr("10 kg"),
+			"city":   to.Ptr("Bombay"),
 		},
 	}, nil)
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 	if r := cmp.Diff(result.PetAPString, PetAPString{
-		ID:     to.Int32Ptr(3),
-		Name:   to.StringPtr("Tommy"),
-		Status: to.BoolPtr(true),
+		ID:     to.Ptr[int32](3),
+		Name:   to.Ptr("Tommy"),
+		Status: to.Ptr(true),
 		AdditionalProperties: map[string]*string{
-			"color":  to.StringPtr("red"),
-			"weight": to.StringPtr("10 kg"),
-			"city":   to.StringPtr("Bombay"),
+			"color":  to.Ptr("red"),
+			"weight": to.Ptr("10 kg"),
+			"city":   to.Ptr("Bombay"),
 		},
 	}); r != "" {
 		t.Fatal(r)
@@ -164,8 +161,8 @@ func TestCreateAPString(t *testing.T) {
 func TestCreateAPTrue(t *testing.T) {
 	client := newPetsClient()
 	result, err := client.CreateAPTrue(context.Background(), PetAPTrue{
-		ID:   to.Int32Ptr(1),
-		Name: to.StringPtr("Puppy"),
+		ID:   to.Ptr[int32](1),
+		Name: to.Ptr("Puppy"),
 		AdditionalProperties: map[string]interface{}{
 			"birthdate": "2017-12-13T02:29:51Z",
 			"complexProperty": map[string]interface{}{
@@ -173,13 +170,11 @@ func TestCreateAPTrue(t *testing.T) {
 			},
 		},
 	}, nil)
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 	if r := cmp.Diff(result.PetAPTrue, PetAPTrue{
-		ID:     to.Int32Ptr(1),
-		Name:   to.StringPtr("Puppy"),
-		Status: to.BoolPtr(true),
+		ID:     to.Ptr[int32](1),
+		Name:   to.Ptr("Puppy"),
+		Status: to.Ptr(true),
 		AdditionalProperties: map[string]interface{}{
 			"birthdate": "2017-12-13T02:29:51Z",
 			"complexProperty": map[string]interface{}{
@@ -195,30 +190,28 @@ func TestCreateAPTrue(t *testing.T) {
 func TestCreateCatAPTrue(t *testing.T) {
 	client := newPetsClient()
 	result, err := client.CreateCatAPTrue(context.Background(), CatAPTrue{
-		ID:   to.Int32Ptr(1),
-		Name: to.StringPtr("Lisa"),
+		ID:   to.Ptr[int32](1),
+		Name: to.Ptr("Lisa"),
 		AdditionalProperties: map[string]interface{}{
 			"birthdate": "2017-12-13T02:29:51Z",
 			"complexProperty": map[string]interface{}{
 				"color": "Red",
 			},
 		},
-		Friendly: to.BoolPtr(true),
+		Friendly: to.Ptr(true),
 	}, nil)
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 	if r := cmp.Diff(result.CatAPTrue, CatAPTrue{
-		ID:     to.Int32Ptr(1),
-		Name:   to.StringPtr("Lisa"),
-		Status: to.BoolPtr(true),
+		ID:     to.Ptr[int32](1),
+		Name:   to.Ptr("Lisa"),
+		Status: to.Ptr(true),
 		AdditionalProperties: map[string]interface{}{
 			"birthdate": "2017-12-13T02:29:51Z",
 			"complexProperty": map[string]interface{}{
 				"color": "Red",
 			},
 		},
-		Friendly: to.BoolPtr(true),
+		Friendly: to.Ptr(true),
 	}); r != "" {
 		t.Fatal(r)
 	}

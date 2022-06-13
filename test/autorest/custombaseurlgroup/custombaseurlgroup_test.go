@@ -5,25 +5,23 @@ package custombaseurlgroup
 
 import (
 	"context"
-	"reflect"
+	"generatortests"
 	"testing"
 
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore/runtime"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
+	"github.com/stretchr/testify/require"
 )
 
 func newPathsClient() *PathsClient {
-	return NewPathsClient(&PathsClientOptions{
-		Host: to.StringPtr(":3000"),
-	})
+	pl := runtime.NewPipeline(generatortests.ModuleName, generatortests.ModuleVersion, runtime.PipelineOptions{}, &azcore.ClientOptions{})
+	return NewPathsClient(to.Ptr(":3000"), pl)
 }
 
 func TestGetEmpty(t *testing.T) {
 	client := newPathsClient()
 	result, err := client.GetEmpty(context.Background(), "localhost", nil)
-	if err != nil {
-		t.Fatalf("GetEmpty: %v", err)
-	}
-	if !reflect.ValueOf(result).IsZero() {
-		t.Fatal("expected zero-value result")
-	}
+	require.NoError(t, err)
+	require.Zero(t, result)
 }

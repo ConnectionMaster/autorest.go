@@ -5,58 +5,47 @@ package azurespecialsgroup
 
 import (
 	"context"
-	"reflect"
+	"generatortests"
 	"testing"
+
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore/runtime"
+	"github.com/stretchr/testify/require"
 )
 
 func newAPIVersionDefaultClient() *APIVersionDefaultClient {
-	return NewAPIVersionDefaultClient(nil)
+	pl := runtime.NewPipeline(generatortests.ModuleName, generatortests.ModuleVersion, runtime.PipelineOptions{}, &azcore.ClientOptions{})
+	return NewAPIVersionDefaultClient(pl)
 }
 
 // GetMethodGlobalNotProvidedValid - GET method with api-version modeled in global settings.
 func TestGetMethodGlobalNotProvidedValid(t *testing.T) {
 	client := newAPIVersionDefaultClient()
 	result, err := client.GetMethodGlobalNotProvidedValid(context.Background(), nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if !reflect.ValueOf(result).IsZero() {
-		t.Fatal("expected zero-value result")
-	}
+	require.NoError(t, err)
+	require.Zero(t, result)
 }
 
 // GetMethodGlobalValid - GET method with api-version modeled in global settings.
 func TestGetMethodGlobalValid(t *testing.T) {
 	client := newAPIVersionDefaultClient()
 	result, err := client.GetMethodGlobalValid(context.Background(), nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if !reflect.ValueOf(result).IsZero() {
-		t.Fatal("expected zero-value result")
-	}
+	require.NoError(t, err)
+	require.Zero(t, result)
 }
 
 // GetPathGlobalValid - GET method with api-version modeled in global settings.
 func TestGetPathGlobalValid(t *testing.T) {
 	client := newAPIVersionDefaultClient()
 	result, err := client.GetPathGlobalValid(context.Background(), nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if !reflect.ValueOf(result).IsZero() {
-		t.Fatal("expected zero-value result")
-	}
+	require.NoError(t, err)
+	require.Zero(t, result)
 }
 
 // GetSwaggerGlobalValid - GET method with api-version modeled in global settings.
 func TestGetSwaggerGlobalValid(t *testing.T) {
 	client := newAPIVersionDefaultClient()
 	result, err := client.GetSwaggerGlobalValid(context.Background(), nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if !reflect.ValueOf(result).IsZero() {
-		t.Fatal("expected zero-value result")
-	}
+	require.NoError(t, err)
+	require.Zero(t, result)
 }

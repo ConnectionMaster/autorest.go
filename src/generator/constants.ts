@@ -10,8 +10,18 @@ import { length, values } from '@azure-tools/linq';
 import { contentPreamble, hasDescription, sortAscending } from './helpers';
 import { commentLength } from '../common/helpers';
 
+async function getModuleVersion(session: Session<CodeModel>): Promise<string> {
+  const version = await session.getValue('module-version', '');
+  if (version === '') {
+    throw new Error('--module-version is a required parameter');
+  } else if (!version.match(/^\d+\.\d+\.\d+$/) && !version.match(/^\d+\.\d+\.\d+-beta\.\d+$/)) {
+    throw new Error(`module version ${version} must in the format major.minor.patch[-beta.N]`);
+  }
+  return version;
+}
+
 // Creates the content in constants.go
-export async function generateConstants(session: Session<CodeModel>, version: string): Promise<string> {
+export async function generateConstants(session: Session<CodeModel>): Promise<string> {
   // lack of operation groups indicates model-only mode.
   if (length(session.model.operationGroups) === 0) {
     return '';
@@ -20,10 +30,14 @@ export async function generateConstants(session: Session<CodeModel>, version: st
   if (session.model.language.go!.host) {
     text += `const host = "${session.model.language.go!.host}"\n\n`;
   }
-  text += `const (\n`;
-  text += `\tmoduleName = "${session.model.language.go!.packageName}"\n`;
-  text += `\tmoduleVersion = "v${version}"\n`;
-  text += ')\n\n';
+  // data-plane clients must manage their own constants for these values
+  if (<boolean>session.model.language.go!.azureARM) {
+    const version = await getModuleVersion(session);
+    text += `const (\n`;
+    text += `\tmoduleName = "${session.model.language.go!.packageName}"\n`;
+    text += `\tmoduleVersion = "v${version}"\n`;
+    text += ')\n\n';
+  }
   for (const enm of values(getEnums(session.model.schemas))) {
     if (enm.desc) {
       text += `${comment(`${enm.name} - ${enm.desc}`, '// ', undefined, commentLength)}\n`;
@@ -51,10 +65,6 @@ export async function generateConstants(session: Session<CodeModel>, version: st
     }
     text += '\t}\n';
     text += '}\n\n';
-    text += `// ToPtr returns a *${enm.name} pointing to the current value.\n`;
-    text += `func (c ${enm.name}) ToPtr() *${enm.name} {\n`;
-    text += '\treturn &c\n';
-    text += `}\n\n`;
   }
   return text;
 }

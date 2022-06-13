@@ -5,24 +5,26 @@ package booleangroup
 
 import (
 	"context"
-	"reflect"
+	"generatortests"
 	"testing"
 
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore/runtime"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	"github.com/google/go-cmp/cmp"
+	"github.com/stretchr/testify/require"
 )
 
 func newBoolClient() *BoolClient {
-	return NewBoolClient(nil)
+	pl := runtime.NewPipeline(generatortests.ModuleName, generatortests.ModuleVersion, runtime.PipelineOptions{}, &azcore.ClientOptions{})
+	return NewBoolClient(pl)
 }
 
 func TestGetTrue(t *testing.T) {
 	client := newBoolClient()
 	result, err := client.GetTrue(context.Background(), nil)
-	if err != nil {
-		t.Fatalf("GetTrue: %v", err)
-	}
-	if r := cmp.Diff(result.Value, to.BoolPtr(true)); r != "" {
+	require.NoError(t, err)
+	if r := cmp.Diff(result.Value, to.Ptr(true)); r != "" {
 		t.Fatal(r)
 	}
 }
@@ -30,10 +32,8 @@ func TestGetTrue(t *testing.T) {
 func TestGetFalse(t *testing.T) {
 	client := newBoolClient()
 	result, err := client.GetFalse(context.Background(), nil)
-	if err != nil {
-		t.Fatalf("GetFalse: %v", err)
-	}
-	if r := cmp.Diff(result.Value, to.BoolPtr(false)); r != "" {
+	require.NoError(t, err)
+	if r := cmp.Diff(result.Value, to.Ptr(false)); r != "" {
 		t.Fatal(r)
 	}
 }
@@ -41,9 +41,7 @@ func TestGetFalse(t *testing.T) {
 func TestGetNull(t *testing.T) {
 	client := newBoolClient()
 	result, err := client.GetNull(context.Background(), nil)
-	if err != nil {
-		t.Fatalf("GetNull: %v", err)
-	}
+	require.NoError(t, err)
 	if r := cmp.Diff(result.Value, (*bool)(nil)); r != "" {
 		t.Fatal(r)
 	}
@@ -53,32 +51,20 @@ func TestGetInvalid(t *testing.T) {
 	client := newBoolClient()
 	result, err := client.GetInvalid(context.Background(), nil)
 	// TODO: verify error response is clear and actionable
-	if err == nil {
-		t.Fatal("unexpected nil error")
-	}
-	if !reflect.ValueOf(result).IsZero() {
-		t.Fatal("expected empty response")
-	}
+	require.Error(t, err)
+	require.Zero(t, result)
 }
 
 func TestPutTrue(t *testing.T) {
 	client := newBoolClient()
 	result, err := client.PutTrue(context.Background(), nil)
-	if err != nil {
-		t.Fatalf("PutTrue: %v", err)
-	}
-	if !reflect.ValueOf(result).IsZero() {
-		t.Fatal("expected zero-value result")
-	}
+	require.NoError(t, err)
+	require.Zero(t, result)
 }
 
 func TestPutFalse(t *testing.T) {
 	client := newBoolClient()
 	result, err := client.PutFalse(context.Background(), nil)
-	if err != nil {
-		t.Fatalf("PutFalse: %v", err)
-	}
-	if !reflect.ValueOf(result).IsZero() {
-		t.Fatal("expected zero-value result")
-	}
+	require.NoError(t, err)
+	require.Zero(t, result)
 }

@@ -5,65 +5,61 @@ package validationgroup
 
 import (
 	"context"
-	"reflect"
+	"generatortests"
 	"testing"
 
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore/runtime"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
-	"github.com/google/go-cmp/cmp"
+	"github.com/stretchr/testify/require"
 )
 
 func newAutoRestValidationTestClient() *AutoRestValidationTestClient {
-	return NewAutoRestValidationTestClient("", nil)
+	pl := runtime.NewPipeline(generatortests.ModuleName, generatortests.ModuleVersion, runtime.PipelineOptions{}, &azcore.ClientOptions{})
+	return NewAutoRestValidationTestClient("", pl)
 }
 
 func TestValidationGetWithConstantInPath(t *testing.T) {
 	client := newAutoRestValidationTestClient()
 	result, err := client.GetWithConstantInPath(context.Background(), nil)
-	if err != nil {
-		t.Fatalf("GetWithConstantInPath: %v", err)
-	}
-	if !reflect.ValueOf(result).IsZero() {
-		t.Fatal("expected zero-value result")
-	}
+	require.NoError(t, err)
+	require.Zero(t, result)
 }
 
 func TestValidationPostWithConstantInBody(t *testing.T) {
 	client := newAutoRestValidationTestClient()
 	product := Product{
-		Child: &ChildProduct{
-			ConstProperty: to.StringPtr("constant")},
-		ConstString: to.StringPtr("constant"),
-		ConstInt:    to.Int32Ptr(0),
-		ConstChild: &ConstantProduct{
-			ConstProperty:  to.StringPtr("constant"),
-			ConstProperty2: to.StringPtr("constant2")}}
+		Child:      &ChildProduct{},
+		ConstChild: &ConstantProduct{},
+	}
 	result, err := client.PostWithConstantInBody(context.Background(), &AutoRestValidationTestClientPostWithConstantInBodyOptions{Body: &product})
-	if err != nil {
-		t.Fatalf("PostWithConstantInBody: %v", err)
-	}
-	if r := cmp.Diff(product, result.Product); r != "" {
-		t.Fatal(r)
-	}
+	require.NoError(t, err)
+	require.Equal(t, Product{
+		Child: &ChildProduct{
+			ConstProperty: to.Ptr("constant"),
+		},
+		ConstChild: &ConstantProduct{
+			ConstProperty:  to.Ptr("constant"),
+			ConstProperty2: to.Ptr("constant2"),
+		},
+		ConstInt:          to.Ptr[int32](0),
+		ConstString:       to.Ptr("constant"),
+		ConstStringAsEnum: to.Ptr("constant_string_as_enum"),
+	}, result.Product)
 }
 
 func TestValidationValidationOfBody(t *testing.T) {
 	t.Skip("need to confirm if this test will remain in the testserver and what values it's expecting")
 	client := newAutoRestValidationTestClient()
-	result, err := client.ValidationOfBody(context.Background(), "123", 150, &AutoRestValidationTestClientValidationOfBodyOptions{
-		Body: &Product{
-			DisplayNames: []*string{
-				to.StringPtr("displayname1"),
-				to.StringPtr("displayname2"),
-				to.StringPtr("displayname3"),
-				to.StringPtr("displayname4"),
-				to.StringPtr("displayname5"),
-				to.StringPtr("displayname6"),
-				to.StringPtr("displayname7")}},
-	})
-	if err != nil {
-		t.Fatalf("ValidationOfBody: %v", err)
-	}
-	if !reflect.ValueOf(result).IsZero() {
-		t.Fatal("expected zero-value result")
-	}
+	result, err := client.ValidationOfBody(context.Background(), "123", 150, Product{
+		DisplayNames: []*string{
+			to.Ptr("displayname1"),
+			to.Ptr("displayname2"),
+			to.Ptr("displayname3"),
+			to.Ptr("displayname4"),
+			to.Ptr("displayname5"),
+			to.Ptr("displayname6"),
+			to.Ptr("displayname7")}}, nil)
+	require.NoError(t, err)
+	require.Zero(t, result)
 }

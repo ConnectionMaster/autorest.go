@@ -5,43 +5,36 @@ package httpinfrastructuregroup
 
 import (
 	"context"
-	"reflect"
+	"generatortests"
 	"testing"
+
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore/runtime"
+	"github.com/stretchr/testify/require"
 )
 
 func newHTTPFailureClient() *HTTPFailureClient {
-	return NewHTTPFailureClient(nil)
+	pl := runtime.NewPipeline(generatortests.ModuleName, generatortests.ModuleVersion, runtime.PipelineOptions{}, &azcore.ClientOptions{})
+	return NewHTTPFailureClient(pl)
 }
 
 func TestHTTPFailureGetEmptyError(t *testing.T) {
 	client := newHTTPFailureClient()
 	result, err := client.GetEmptyError(context.Background(), nil)
-	if err == nil {
-		t.Fatalf("Expected an error but did not receive one")
-	}
-	if !reflect.ValueOf(result).IsZero() {
-		t.Fatal("expected empty response")
-	}
+	require.Error(t, err)
+	require.Zero(t, result)
 }
 
 func TestHTTPFailureGetNoModelEmpty(t *testing.T) {
 	client := newHTTPFailureClient()
 	result, err := client.GetNoModelEmpty(context.Background(), nil)
-	if err == nil {
-		t.Fatalf("Expected an error but did not receive one")
-	}
-	if !reflect.ValueOf(result).IsZero() {
-		t.Fatal("expected empty response")
-	}
+	require.Error(t, err)
+	require.Zero(t, result)
 }
 
 func TestHTTPFailureGetNoModelError(t *testing.T) {
 	client := newHTTPFailureClient()
 	result, err := client.GetNoModelError(context.Background(), nil)
-	if err == nil {
-		t.Fatalf("Expected an error but did not receive one")
-	}
-	if !reflect.ValueOf(result).IsZero() {
-		t.Fatal("expected empty response")
-	}
+	require.Error(t, err)
+	require.Zero(t, result)
 }

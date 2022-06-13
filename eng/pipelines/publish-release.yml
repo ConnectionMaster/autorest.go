@@ -2,7 +2,7 @@ trigger: none
 pr: none
 
 variables:
-  NodeVersion: '14.x'
+  NodeVersion: '16.x'
   goTestPath: '$(system.defaultWorkingDirectory)/test'
   GOBIN: '$(system.defaultWorkingDirectory)/bin/go'
 
@@ -26,22 +26,23 @@ steps:
       rush rebuild -v
     displayName: 'Build Generator Sources'
 
+  - task: GoTool@0
+    inputs:
+      version: '1.18'
+    displayName: "Select Go Version"
+
   - script: |
       rush regenerate
+      rush modtidy 2>&1
       git add -A ./test/.
       git diff --staged -w 1>&2
     displayName: 'Regenerate Autorest Tests'
     failOnStderr: true
 
-  - task: GoTool@0
-    inputs:
-      version: '1.17'
-    displayName: "Select Go Version"
-
   - script: |
       set -e
       go version
-      go get github.com/jstemmer/go-junit-report
+      go install github.com/jstemmer/go-junit-report@v1.0.0
     displayName: 'Install Dependencies'
     workingDirectory: '$(goTestPath)'
 
